@@ -3,7 +3,7 @@ import { ref } from 'vue'
 
 export const useTagStore = defineStore('tag', () => {
   const tags = ref<string[]>([
-    '全部',
+    // '全部',
     // '已完成',
     // '未完成',
     // '高优先级',
@@ -21,11 +21,5 @@ export const useTagStore = defineStore('tag', () => {
     '娱乐',
     '项目',
   ])
-  const currentActiveTag = ref<string>('全部')
-
-  const setCurrentActiveTag = (tag: string) => {
-    currentActiveTag.value = tag
-  }
-
-  return { tags, currentActiveTag, setCurrentActiveTag }
+  return { tags }
 })

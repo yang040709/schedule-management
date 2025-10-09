@@ -1,4 +1,4 @@
-<script setup lang='ts'>
+<script setup lang="ts">
 import type { ScheduleEvent } from '@/types/schedule'
 
 const props = defineProps<{ event: ScheduleEvent }>()
@@ -52,7 +52,7 @@ function onClickItem() {
           {{ tag }}
         </span>
       </div>
-      <div class="mt-1 text-xs text-slate-500">
+      <div class="mt-1 text-xs text-slate-500" v-if="event.startTime && event.endTime">
         {{ event.startTime }} - {{ event.endTime }}
       </div>
     </div>
@@ -66,5 +66,4 @@ function onClickItem() {
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
