@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import type { ScheduleEvent } from '@/types/schedule'
+import { computed } from 'vue'
+import { List } from 'lucide-vue-next'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
 
 const props = defineProps<{ event: ScheduleEvent }>()
 
 const emit = defineEmits<{
   (e: 'toggle-complete', id: string): void
   (e: 'click', id: string): void
+  (e: 'edit', id: string): void
+  (e: 'delete', id: string): void
 }>()
 
 function onToggleComplete(e: Event) {
@@ -16,6 +22,34 @@ function onToggleComplete(e: Event) {
 function onClickItem() {
   emit('click', props.event.id)
 }
+
+function handleEdit(e: Event) {
+  e.stopPropagation()
+  emit('edit', props.event.id)
+}
+function handleDelete(e: Event) {
+  e.stopPropagation()
+  emit('delete', props.event.id)
+}
+
+const priorityMap = {
+  high: {
+    color: 'text-[#dc2626]', // 鲜红色 - 传达紧急、需要立即处理的感觉
+    text: '高优先级',
+  },
+  medium: {
+    color: 'text-[#f59e0b]', // 橙色 - 表示需要关注，但不紧急
+    text: '中优先级',
+  },
+  low: {
+    color: 'text-[#10b981]', // 绿色 - 表示可以从容处理
+    text: '低优先级',
+  },
+}
+
+const priority = computed(() => {
+  return priorityMap[props.event.priority]
+})
 </script>
 
 <template>
@@ -51,18 +85,27 @@ function onClickItem() {
         >
           {{ tag }}
         </span>
+        <span
+          class="shrink-0 rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium"
+          :class="priority.color"
+        >
+          {{ priority.text }}
+        </span>
       </div>
+      <p v-if="event.description" class="mt-2 text-sm text-slate-500">{{ event.description }}</p>
       <div class="mt-1 text-xs text-slate-500" v-if="event.startTime && event.endTime">
         {{ event.startTime }} - {{ event.endTime }}
       </div>
     </div>
-
-    <!-- right icon
-    <div class="text-slate-400">
-      <svg class="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2Z" fill="currentColor" />
-      </svg>
-    </div> -->
+    <Popover>
+      <PopoverTrigger @click.stop> <List class="font-md text-slate-400 mr-1" /> </PopoverTrigger>
+      <PopoverContent class="w-auto">
+        <div class="flex flex-col gap-3">
+          <Button variant="secondary" @click="handleEdit">编辑</Button>
+          <Button variant="destructive" @click="handleDelete">删除</Button>
+        </div>
+      </PopoverContent>
+    </Popover>
   </div>
 </template>
 

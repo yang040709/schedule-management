@@ -12,8 +12,10 @@ defineEmits<{
 
 <template>
   <span
-    class="rounded-full px-4 py-2 text-sm mr-1 border-1 cursor-pointer"
-    :class="[isActive ? 'bg-black text-white border-black' : 'bg-white text-gray-800']"
+    class="rounded-full px-4 py-2 text-sm mr-1 border-1 cursor-pointer hover:bg-gray-50 transition-colors"
+    :class="[
+      isActive ? 'bg-black text-white border-black hover:bg-gray-950' : 'bg-white text-gray-800',
+    ]"
     @click="$emit('click')"
   >
     {{ text }}

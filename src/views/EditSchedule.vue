@@ -24,7 +24,7 @@ import {
 } from '@internationalized/date'
 import { CalendarIcon } from 'lucide-vue-next'
 import { toDate } from 'reka-ui/date'
-import { computed, h, ref } from 'vue'
+import { computed, h, isProxy, ref } from 'vue'
 import { cn } from '@/lib/utils'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -35,6 +35,17 @@ import { useScheduleStore } from '@/stores/schedule'
 
 import type { ScheduleEvent, ScheduleForm } from '@/types/schedule'
 import { useRouter } from 'vue-router'
+
+const props = defineProps<{
+  date: string
+  id: string
+}>()
+
+const scheduleStore = useScheduleStore()
+const tagStore = useTagStore()
+
+const schedule = computed(() => scheduleStore.getScheduleData(props.date, props.id))
+
 const formSchema = toTypedSchema(
   z.object({
     title: z.string().min(2).max(50),
@@ -55,38 +66,24 @@ const df = new DateFormatter('en-US', {
 
 const placeholder = ref()
 
-// interface ScheduleForm extends ScheduleEvent {
-//   date: string
-// }
-
 const { handleSubmit, setFieldValue, values } = useForm<ScheduleForm>({
   validationSchema: formSchema,
   initialValues: {
-    date: today(getLocalTimeZone()).toString(),
+    date: props.date,
+    title: schedule.value?.title,
+    description: schedule.value?.description,
+    category: schedule.value?.category,
+    priority: schedule.value?.priority,
+    completed: schedule.value?.completed,
+    startTime: schedule.value?.startTime,
+    endTime: schedule.value?.endTime,
   },
 })
 
-/* 
-export interface ScheduleEvent {
-  id: string // 唯一标识符
-  title: string // 标题
-  description?: string // 可选字段，使用?
-  startTime?: string // 开始时间
-  endTime?: string // 结束时间
-  priority: PriorityLevel // 优先级
-  category: string[] // 分类支持多个标签
-  completed: boolean // 完成状态
-}
-*/
 const value = computed({
   get: () => (values.date ? parseDate(values.date) : undefined),
   set: (val) => val,
 })
-
-const scheduleStore = useScheduleStore()
-
-const tagStore = useTagStore()
-// console.log(tagStore.tags)
 
 const addTags = (item: string) => {
   if (!values.category) {
@@ -114,7 +111,7 @@ const onSubmit = handleSubmit((validateValues) => {
     return
   }
   console.log(values)
-  scheduleStore.setScheduleData(values.date, values)
+  scheduleStore.updateScheduleData(values.date, { ...values, id: props.id }, props.date)
   router.push('/calendar')
 })
 </script>
@@ -124,7 +121,7 @@ const onSubmit = handleSubmit((validateValues) => {
     <div class="bg-white rounded-2xl shadow-lg overflow-hidden p-4 sm:p-6 lg:p-8">
       <!-- <div> -->
       <div class="p-6 sm:p-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">添加新日程</h2>
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">修改日程</h2>
         <form @submit="onSubmit" class="space-y-5">
           <FormField v-slot="{ componentField }" name="title">
             <FormItem class="space-y-2">
@@ -278,7 +275,7 @@ const onSubmit = handleSubmit((validateValues) => {
             <Button
               type="submit"
               class="w-full h-12 text-white font-medium rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-              >添加</Button
+              >修改</Button
             >
           </div>
         </form>

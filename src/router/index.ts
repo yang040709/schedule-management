@@ -5,10 +5,31 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      component: () => import('@/views/Today.vue'),
+      // component: () => import('@/views/Today.vue'),
+      redirect: () => {
+        return {
+          name: 'calendar',
+          params: {
+            date: new Date().toISOString().slice(0, 10),
+          },
+        }
+      },
     },
     {
       path: '/calendar',
+      redirect(to) {
+        return {
+          name: 'calendar',
+          params: {
+            date: new Date().toISOString().slice(0, 10),
+          },
+        }
+      },
+    },
+    {
+      path: '/calendar/:date',
+      name: 'calendar',
+      props: true,
       component: () => import('@/views/Calendar.vue'),
     },
     {
@@ -18,6 +39,12 @@ const router = createRouter({
     {
       path: '/add-schedule',
       component: () => import('@/views/AddSchedule.vue'),
+    },
+    {
+      path: '/edit/:date/:id',
+      name: 'edit',
+      props: true,
+      component: () => import('@/views/EditSchedule.vue'),
     },
   ],
 })
