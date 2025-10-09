@@ -16,6 +16,6 @@
 4. vue-use
 
 效果：
-![home-pc]("./img/home-pc.png")
-![add-pc]("./img/add-pc.png")
-![home-mobile]("./img/home-phone.png")
+![home-pc](/img/home-pc.png)
+![add-pc](/img/add-pc.png)
+![home-mobile](/img/home-phone.png)
