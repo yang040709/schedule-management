@@ -28,7 +28,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v4 # 使用较新的 v4 版本
         with:
-          version: 9 # 指定你项目使用的 pnpm 版本，确保与本地开发一致
+          version: 10 # 指定你项目使用的 pnpm 版本，确保与本地开发一致
 
       - name: Set up Node
         uses: actions/setup-node@v4
