@@ -1,6 +1,6 @@
 # 简程
 
-一个简洁的行程管理网站
+一个简洁的日程管理网站
 
 特点：
 
@@ -16,6 +16,6 @@
 4. vue-use
 
 效果：
-![home-pc](/img/home-pc.png)
-![add-pc](/img/add-pc.png)
-![home-mobile](/img/home-phone.png)
+![home-pc](/img/home-pc-v1.png)
+![add-pc](/img/add-pc-v1.png)
+![home-mobile](/img/home-phone-v1.png)
