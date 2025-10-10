@@ -34,12 +34,17 @@ import TagItem from '@/components/Tag/TagItem.vue'
 import { useScheduleStore } from '@/stores/schedule'
 
 import type { ScheduleEvent, ScheduleForm } from '@/types/schedule'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
+import { toast } from 'vue-sonner'
+import ReturnButton from '@/components/ReturnButton.vue'
 
 const props = defineProps<{
   date: string
   id: string
 }>()
+
+const router = useRouter()
+const route = useRoute()
 
 const scheduleStore = useScheduleStore()
 const tagStore = useTagStore()
@@ -48,12 +53,14 @@ const schedule = computed(() => scheduleStore.getScheduleData(props.date, props.
 
 const formSchema = toTypedSchema(
   z.object({
-    title: z.string().min(2).max(50),
-    description: z.string(),
-    date: z.string().refine((v) => v, { message: 'A date of birth is required.' }),
-    // date:
+    title: z
+      .string('标题不能为空且必须为字符串')
+      .min(2, '标题不能少于2个字')
+      .max(50, '标题不能超过50个字'),
+    description: z.string('描述不能为空且必须为字符串'),
+    date: z.string().refine((v) => v, '请选择日期'),
     category: z.refine(() => true),
-    priority: z.enum(['low', 'medium', 'high']),
+    priority: z.enum(['low', 'medium', 'high'], '请选择优先级'),
     completed: z.refine(() => true),
     startTime: z.refine(() => true),
     endTime: z.refine(() => true),
@@ -102,8 +109,6 @@ const addTags = (item: string) => {
   console.log(values.category)
 }
 
-const router = useRouter()
-
 const onSubmit = handleSubmit((validateValues) => {
   console.log('Form submitted!', validateValues)
   if (values.date === undefined) {
@@ -112,14 +117,29 @@ const onSubmit = handleSubmit((validateValues) => {
   }
   console.log(values)
   scheduleStore.updateScheduleData(values.date, { ...values, id: props.id }, props.date)
+  toast.success('修改成功')
   router.push('/calendar')
 })
+
+const handleReturn = () => {
+  const returnPath = route.query?.from || '/'
+  console.log(returnPath)
+  router.push(returnPath as string)
+}
 </script>
 
 <template>
   <div class="w-full max-w-3xl mx-auto">
     <div class="bg-white rounded-2xl shadow-lg overflow-hidden p-4 sm:p-6 lg:p-8">
       <!-- <div> -->
+      <!-- <Button
+        type="button"
+        class="w-auto px-8 h-12 text-white font-medium
+         rounded-lg transition-all transform hover:scale-[1.02] 
+         active:scale-[0.98]"
+        >返回</Button
+      > -->
+      <ReturnButton @click="handleReturn" />
       <div class="p-6 sm:p-8">
         <h2 class="text-2xl font-bold text-gray-900 mb-6">修改日程</h2>
         <form @submit="onSubmit" class="space-y-5">

@@ -12,12 +12,14 @@ import type { DateValue } from '@internationalized/date'
 import { getLocalTimeZone, today } from '@internationalized/date'
 import CalendarDrawer from '@/components/CalendarDrawer.vue'
 // const defaultDate = today(getLocalTimeZone()).toString()
+// import { toast } from 'vue-sonner'
+import { Button } from '@/components/ui/button'
 
 const { date } = defineProps<{
   date: string
 }>()
 
-console.log(today(getLocalTimeZone()).toString())
+// console.log(today(getLocalTimeZone()).toString())
 
 // import { defineStore } from 'pinia'
 // import type { DateValue } from '@internationalized/date'

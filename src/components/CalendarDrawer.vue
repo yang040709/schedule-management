@@ -23,13 +23,12 @@ import AppCalendar from '@/components/AppCalendar.vue'
       <DrawerHeader>
         <DrawerTitle>请选择日程的日期</DrawerTitle>
         <DrawerDescription> 选择日期后，日程将显示在此日期的下方。 </DrawerDescription>
-        <AppCalendar />
+        <AppCalendar class="w-[fit-content] mx-auto mt-5" />
       </DrawerHeader>
       <DrawerFooter>
-        <!-- <Button>Submit</Button> -->
-        <!-- <DrawerClose>
+        <DrawerClose>
           <Button variant="outline" class="w-full"> Cancel </Button>
-        </DrawerClose> -->
+        </DrawerClose>
       </DrawerFooter>
     </DrawerContent>
   </Drawer>

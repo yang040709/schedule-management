@@ -4,7 +4,7 @@ import { computed } from 'vue'
 import { List } from 'lucide-vue-next'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
-
+import DeleteDialog from './DeleteDialog.vue'
 const props = defineProps<{ event: ScheduleEvent }>()
 
 const emit = defineEmits<{
@@ -27,22 +27,18 @@ function handleEdit(e: Event) {
   e.stopPropagation()
   emit('edit', props.event.id)
 }
-function handleDelete(e: Event) {
-  e.stopPropagation()
-  emit('delete', props.event.id)
-}
 
 const priorityMap = {
   high: {
-    color: 'text-[#dc2626]', // 鲜红色 - 传达紧急、需要立即处理的感觉
+    class: 'text-red-700 bg-red-100',
     text: '高优先级',
   },
   medium: {
-    color: 'text-[#f59e0b]', // 橙色 - 表示需要关注，但不紧急
+    class: 'text-yellow-700 bg-yellow-100',
     text: '中优先级',
   },
   low: {
-    color: 'text-[#10b981]', // 绿色 - 表示可以从容处理
+    class: 'text-green-700 bg-green-100',
     text: '低优先级',
   },
 }
@@ -87,7 +83,7 @@ const priority = computed(() => {
         </span>
         <span
           class="shrink-0 rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium"
-          :class="priority.color"
+          :class="priority.class"
         >
           {{ priority.text }}
         </span>
@@ -102,7 +98,9 @@ const priority = computed(() => {
       <PopoverContent class="w-auto">
         <div class="flex flex-col gap-3">
           <Button variant="secondary" @click="handleEdit">编辑</Button>
-          <Button variant="destructive" @click="handleDelete">删除</Button>
+          <DeleteDialog @confirm="$emit('delete', event.id)">
+            <Button variant="destructive" @click.prevent>删除</Button>
+          </DeleteDialog>
         </div>
       </PopoverContent>
     </Popover>

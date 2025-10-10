@@ -34,15 +34,23 @@ import TagItem from '@/components/Tag/TagItem.vue'
 import { useScheduleStore } from '@/stores/schedule'
 
 import type { ScheduleEvent, ScheduleForm } from '@/types/schedule'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
+import { toast } from 'vue-sonner'
+import ReturnButton from '@/components/ReturnButton.vue'
+
+const router = useRouter()
+const route = useRoute()
+
 const formSchema = toTypedSchema(
   z.object({
-    title: z.string().min(2).max(50),
-    description: z.string(),
-    date: z.string().refine((v) => v, { message: 'A date of birth is required.' }),
-    // date:
+    title: z
+      .string('标题不能为空且必须为字符串')
+      .min(2, '标题不能少于2个字')
+      .max(50, '标题不能超过50个字'),
+    description: z.string('描述不能为空且必须为字符串'),
+    date: z.string().refine((v) => v, '请选择日期'),
     category: z.refine(() => true),
-    priority: z.enum(['low', 'medium', 'high']),
+    priority: z.enum(['low', 'medium', 'high'], '请选择优先级'),
     completed: z.refine(() => true),
     startTime: z.refine(() => true),
     endTime: z.refine(() => true),
@@ -55,29 +63,13 @@ const df = new DateFormatter('en-US', {
 
 const placeholder = ref()
 
-// interface ScheduleForm extends ScheduleEvent {
-//   date: string
-// }
-
 const { handleSubmit, setFieldValue, values } = useForm<ScheduleForm>({
   validationSchema: formSchema,
   initialValues: {
-    date: today(getLocalTimeZone()).toString(),
+    date: (route.query?.date || today(getLocalTimeZone()).toString()) as string,
   },
 })
 
-/* 
-export interface ScheduleEvent {
-  id: string // 唯一标识符
-  title: string // 标题
-  description?: string // 可选字段，使用?
-  startTime?: string // 开始时间
-  endTime?: string // 结束时间
-  priority: PriorityLevel // 优先级
-  category: string[] // 分类支持多个标签
-  completed: boolean // 完成状态
-}
-*/
 const value = computed({
   get: () => (values.date ? parseDate(values.date) : undefined),
   set: (val) => val,
@@ -105,8 +97,6 @@ const addTags = (item: string) => {
   console.log(values.category)
 }
 
-const router = useRouter()
-
 const onSubmit = handleSubmit((validateValues) => {
   console.log('Form submitted!', validateValues)
   if (values.date === undefined) {
@@ -115,14 +105,24 @@ const onSubmit = handleSubmit((validateValues) => {
   }
   console.log(values)
   scheduleStore.setScheduleData(values.date, values)
+  toast.success('添加日程成功', {
+    description: '1秒后跳转到日历页',
+  })
   router.push('/calendar')
 })
+
+const handleReturn = () => {
+  const returnPath = route.query?.from || '/'
+  console.log(returnPath)
+  router.push(returnPath as string)
+}
 </script>
 
 <template>
   <div class="w-full max-w-3xl mx-auto">
     <div class="bg-white rounded-2xl shadow-lg overflow-hidden p-4 sm:p-6 lg:p-8">
       <!-- <div> -->
+      <ReturnButton @click="handleReturn" />
       <div class="p-6 sm:p-8">
         <h2 class="text-2xl font-bold text-gray-900 mb-6">添加新日程</h2>
         <form @submit="onSubmit" class="space-y-5">

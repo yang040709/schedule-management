@@ -38,6 +38,7 @@ const router = createRouter({
     },
     {
       path: '/add-schedule',
+      name: 'addSchedule',
       component: () => import('@/views/AddSchedule.vue'),
     },
     {

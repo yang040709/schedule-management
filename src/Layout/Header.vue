@@ -65,7 +65,12 @@ const todayLabel = new Intl.DateTimeFormat('zh-CN', {
             {{ todayLabel }}
           </span>
           <RouterLink
-            to="/add-schedule"
+            :to="{
+              name: 'addSchedule',
+              query: {
+                from: $route.fullPath,
+              },
+            }"
             class="inline-flex items-center rounded-lg bg-black px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
           >
             新增日程
