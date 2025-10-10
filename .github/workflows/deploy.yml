@@ -1,0 +1,55 @@
+name: Deploy static content to Pages
+
+on:
+  push:
+    branches: ['main']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # 新增步骤：设置 pnpm
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4 # 使用较新的 v4 版本
+        with:
+          version: 9 # 指定你项目使用的 pnpm 版本，确保与本地开发一致
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'pnpm' # 将缓存策略改为 pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile # 使用 pnpm 安装依赖，并锁定版本
+
+      - name: Build
+        run: pnpm run build # 使用 pnpm 执行构建
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
