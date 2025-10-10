@@ -27,7 +27,7 @@ const devConfig = defineConfig({
   base: '/',
 })
 
-let config
+let config = commonConfig
 
 if (process.env.NODE_ENV === 'production') {
   config = mergeConfig(commonConfig, prodConfig)
