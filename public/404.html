@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>SPA Fallback</title>
+
+</head>
+
+<body>
+  <!-- 或者简单重定向 -->
+  <script>
+    // 备用方案：直接重定向到首页，由前端路由处理
+    sessionStorage.redirect = location.href;
+    window.location.href = '/schedule-management';
+  </script>
+</body>
+
+</html>
