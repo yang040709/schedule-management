@@ -1,5 +1,5 @@
 import type { ScheduleData } from '@/types/schedule'
-export const scheduleData: ScheduleData = {
+export const scheduleData = {
   // 2025-10-06 (星期一)
   '2025-10-06': [
     {

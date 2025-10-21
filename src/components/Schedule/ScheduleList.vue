@@ -9,7 +9,7 @@ import { useRoute, useRouter } from 'vue-router'
 import CalendarDrawer from '../CalendarDrawer.vue'
 import { Button } from '../ui/button'
 import { toast } from 'vue-sonner'
-
+import type { PriorityLevel } from '@/types/schedule'
 const router = useRouter()
 const route = useRoute()
 
@@ -17,12 +17,13 @@ const scheduleStore = useScheduleStore()
 const { scheduleData } = storeToRefs(scheduleStore)
 
 const selectDateSchedule = computed(() => {
-  return scheduleData.value[route.params.date as string] || []
+  return scheduleData.value || []
 })
 
 const events = computed(() => {
-  let scheduleList = scheduleData.value[route.params.date as string]
-  // return scheduleData.value[route.params.date as string] || []
+  let scheduleList = scheduleData.value
+  // filter by date
+  scheduleList = scheduleList.filter((e) => e.date === route.params.date)
   if (route.query.completed) {
     const isCompleted = route.query.completed === 'true'
     if (isCompleted) {
@@ -31,11 +32,12 @@ const events = computed(() => {
       scheduleList = scheduleList?.filter((e) => !e.completed) || []
     }
   }
-  // priority filter
+  // filter by priority
   if (route.query.priority) {
     const p = route.query.priority as 'high' | 'medium' | 'low'
     scheduleList = scheduleList?.filter((e) => e.priority === p) || []
   }
+  // filter by tag
   if (route.query.tag) {
     const tag = route.query.tag
     scheduleList =
@@ -44,8 +46,12 @@ const events = computed(() => {
   return scheduleList || []
 })
 
-const totalCount = computed(() => selectDateSchedule.value.length)
-const completedCount = computed(() => selectDateSchedule.value.filter((e) => e.completed).length)
+const totalCount = computed(
+  () => selectDateSchedule.value.filter((e) => e.date === route.params.date).length,
+)
+const completedCount = computed(
+  () => selectDateSchedule.value.filter((e) => e.completed && e.date === route.params.date).length,
+)
 
 /* 
 处理各种事件
@@ -73,9 +79,6 @@ const handleDelete = (id: string) => {
 }
 
 const handleAddNew = () => {
-  console.log('add')
-  console.log(route.params.date)
-
   router.push({
     name: 'addSchedule',
     query: {
@@ -128,7 +131,7 @@ const clearPriority = () => {
     },
   })
 }
-const setPriority = (priority: 'high' | 'medium' | 'low') => {
+const setPriority = (priority: PriorityLevel) => {
   router.push({
     name: route.name,
     params: route.params,
@@ -172,13 +175,8 @@ const setPriority = (priority: 'high' | 'medium' | 'low') => {
               
             </span> -->
           </div>
-          <!-- <button
-            type="button"
-            class="inline-flex items-center gap-2 rounded-lg bg-gray-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-            @click="handleAddNew"
-          >
-            新增日程
-          </button> -->
+
+          <Button @click="handleAddNew" variant="outline"> 新增日程 </Button>
         </div>
         <div class="flex flex-wrap items-center gap-2 text-sm text-gray-600">
           <span class="text-gray-500 w-12">概况</span>
@@ -245,7 +243,7 @@ const setPriority = (priority: 'high' | 'medium' | 'low') => {
     </div>
 
     <div
-      v-if="selectDateSchedule.length === 0"
+      v-if="totalCount === 0"
       class="rounded-2xl bg-white py-14 text-center shadow-sm ring-1 ring-gray-100"
     >
       <div class="mx-auto w-full max-w-sm px-6">
@@ -265,7 +263,7 @@ const setPriority = (priority: 'high' | 'medium' | 'low') => {
       </div>
     </div>
     <div
-      v-else-if="selectDateSchedule.length !== 0 && events.length === 0"
+      v-else-if="totalCount !== 0 && events.length === 0"
       class="rounded-2xl bg-white py-14 text-center shadow-sm ring-1 ring-gray-100"
     >
       <div class="mx-auto w-full max-w-sm px-6">

@@ -1,13 +1,18 @@
 <script setup lang="ts">
+import logoSrc from '@/static/img/logo.png'
 import { useRoute } from 'vue-router'
 const navList = [
   {
-    text: '今日',
-    path: '/',
-  },
-  {
     text: '日程',
     path: '/calendar/2025-10-09',
+  },
+  {
+    text: '列表',
+    path: '/schedule-list',
+  },
+  {
+    text: '设置',
+    path: '/setting',
   },
 ]
 
@@ -36,11 +41,12 @@ const todayLabel = new Intl.DateTimeFormat('zh-CN', {
             class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-gray-500 to-indigo-600 text-white shadow-sm"
             >简</span
           > -->
+          <img :src="logoSrc" class="w-8 h-8" alt="logo" />
           <h1 class="text-xl font-semibold tracking-tight text-gray-900">简程</h1>
         </RouterLink>
 
         <!-- 导航栏的位置，以后如果添加导航栏，可以放在这里 -->
-        <!-- <nav
+        <nav
           class="hidden sm:flex items-center gap-1 rounded-xl p-1 bg-gray-50 border border-gray-100"
         >
           <RouterLink
@@ -56,11 +62,16 @@ const todayLabel = new Intl.DateTimeFormat('zh-CN', {
           >
             {{ item.text }}
           </RouterLink>
-        </nav> -->
+        </nav>
 
         <div class="flex items-center gap-3">
           <span
-            class="hidden sm:inline-flex items-center rounded-full bg-gray-50 text-black border border-gray-200 px-3 py-1 text-xs font-medium"
+            class="hidden cursor-pointer sm:inline-flex items-center rounded-full bg-gray-50 text-black border border-gray-200 px-3 py-1 text-xs font-medium"
+            @click="
+              $router.push({
+                name: 'todayCalendar',
+              })
+            "
           >
             {{ todayLabel }}
           </span>
