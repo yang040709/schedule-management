@@ -1,3 +1,4 @@
 export const APP_CONFIG = Object.freeze({
-  baseTitle: '简程',
+  BaseTitle: '简程',
+  ScheduleStorageKey: 'scheduleData-v2',
 })

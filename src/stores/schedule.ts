@@ -4,6 +4,7 @@ import { ref } from 'vue'
 import { scheduleData as mockData } from './mockData'
 import { nanoid } from 'nanoid'
 import { useStorage } from '@vueuse/core'
+import { APP_CONFIG } from '@/config/app'
 export const useScheduleStore = defineStore('schedule', () => {
   // const scheduleData = ref<ScheduleData>(mockData)
   // const scheduleData = ref<ScheduleData>({
@@ -19,7 +20,7 @@ export const useScheduleStore = defineStore('schedule', () => {
   //     },
   //   ],
   // })
-  const scheduleData = useStorage<ScheduleData>('scheduleData-v2', [
+  const scheduleData = useStorage<ScheduleData>(APP_CONFIG.ScheduleStorageKey, [
     {
       id: 'fc20251006001',
       title: '周计划制定',
@@ -34,6 +35,7 @@ export const useScheduleStore = defineStore('schedule', () => {
 
   const getScheduleData = (date: string, id: string) => {
     const schedule = scheduleData.value || []
+    console.log(date, id)
     return schedule.find((item) => item.id === id && item.date === date)
   }
   const setScheduleData = (date: string, data: ScheduleForm) => {
