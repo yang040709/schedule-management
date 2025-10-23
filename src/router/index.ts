@@ -6,7 +6,6 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      // component: () => import('@/views/Today.vue'),
       redirect: () => {
         return {
           name: 'calendar',
@@ -29,6 +28,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/flow',
+      name: 'flow',
+      component: () => import('@/views/Flow.vue'),
+      meta: {
+        layout: 'full',
+      },
+    },
+    {
       path: '/calendar/:date',
       name: 'calendar',
       props: true,
@@ -39,7 +46,7 @@ const router = createRouter({
     },
     {
       path: '/schedule-list',
-      name: 'scheduleList',
+      name: 'schedule-list',
       component: () => import('@/views/ScheduleList.vue'),
     },
     {
@@ -51,7 +58,7 @@ const router = createRouter({
       },
     },
     {
-      path: '/edit/:date/:id',
+      path: '/edit/:id',
       name: 'edit',
       props: true,
       component: () => import('@/views/EditSchedule.vue'),
@@ -68,6 +75,11 @@ const router = createRouter({
       path: '/about',
       name: 'about',
       component: () => import('@/views/About.vue'),
+
+      meta: {
+        title: '关于',
+        layout: 'full',
+      },
     },
     {
       path: '/:catchAll(.*)',

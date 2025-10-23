@@ -27,23 +27,33 @@ import type { ScheduleEvent, ScheduleForm } from '@/types/schedule'
 import { useRouter, useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
 import ReturnButton from '@/components/ReturnButton.vue'
-
-
+import { useTagStore } from '@/stores/tag'
+import Tags from '@/components/Tag/Tags.vue'
 import { useScheduleFrom } from '@/hooks/useScheduleFrom'
 import { computed } from 'vue'
+import { X } from 'lucide-vue-next'
+import { getTodayDate } from '@/utils/date'
 const route = useRoute()
 const router = useRouter()
 const scheduleStore = useScheduleStore()
+const tagStore = useTagStore()
+
+const schedule = computed(() => {
+  return scheduleStore.getScheduleData(route.params?.id as string)
+})
+
+const oldDate = computed(() => {
+  return schedule.value?.date || getTodayDate();
+})
 
 const submitFunc = () => {
-  scheduleStore.setScheduleData(values.date, values)
-  scheduleStore.updateScheduleData(values.date, values as ScheduleEvent, route.query?.date as string)
+  scheduleStore.updateScheduleData(values as ScheduleEvent)
   toast.success('修改日程成功', {
     description: '1秒后跳转到日历页',
   })
   setTimeout(() => {
     const defaultDate = today(getLocalTimeZone()).toString()
-    const from = (route.query?.date as string) || defaultDate
+    const from = (oldDate.value) || defaultDate
     router.push({
       name: 'calendar',
       params: {
@@ -54,17 +64,10 @@ const submitFunc = () => {
 }
 
 
-
-const schedule = computed(() => {
-  return scheduleStore.getScheduleData(route.params?.date as string, route.params?.id as string)
-})
-
-
-
 const initValueFn = () => {
   return {
     id: route.params.id || '',
-    date: (route.params?.date || today(getLocalTimeZone()).toString()) as string,
+    date: (oldDate.value || today(getLocalTimeZone()).toString()) as string,
     title: schedule.value?.title || '日程标题',
     description: schedule.value?.description,
     category: schedule.value?.category,
@@ -75,7 +78,8 @@ const initValueFn = () => {
   }
 }
 
-const { onSubmit, handleReturn, values, setFieldValue, placeholder, value, addTags, df, tagStore } = useScheduleFrom(initValueFn, submitFunc);
+const { onSubmit, handleReturn, values, setFieldValue, placeholder, value, df, categoryInput, addCategory, removeCategory, addCategoryByClickTag }
+  = useScheduleFrom(initValueFn, submitFunc);
 
 </script>
 
@@ -193,14 +197,26 @@ const { onSubmit, handleReturn, values, setFieldValue, placeholder, value, addTa
               <FormMessage />
             </FormItem>
           </FormField>
-          <FormField v-slot="{ }" name="category">
+          <FormField v-slot="{ componentField }" name="category">
             <FormItem class="space-y-3">
               <FormLabel class="text-base font-medium">日程标签（可选）</FormLabel>
               <FormControl>
-                <div class="flex flex-wrap gap-2">
-                  <TagItem v-for="item in tagStore.tags"
-                    :is-active="values.category instanceof Array && values.category?.includes(item)" :text="item"
-                    @click="addTags(item)" class="px-3 py-1.5" />
+                <div class="flex gap-2">
+                  <Input v-model="categoryInput" placeholder="输入分类" class="flex-1" />
+                  <Button @click="addCategory" size="sm">添加</Button>
+                </div>
+                <div>
+                  <p class="text-gray-600 mb-3 font-bold">点击下面标签，快速添加日程标签</p>
+                  <Tags :tags="tagStore.tags" @click="addCategoryByClickTag" />
+                </div>
+                <div class="flex flex-wrap gap-1">
+                  <span v-for="(item, index) in componentField.modelValue" :key="index"
+                    class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full flex items-center gap-1">
+                    {{ item }}
+                    <button @click="removeCategory(item)" class="text-gray-400 hover:text-red-500">
+                      <X class="w-4" />
+                    </button>
+                  </span>
                 </div>
               </FormControl>
               <FormMessage class="text-sm" />

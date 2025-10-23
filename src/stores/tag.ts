@@ -1,14 +1,9 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-
+import { readonly } from 'vue'
+import { useLocalStorage } from '@vueuse/core'
+import { APP_CONFIG } from '@/config/app'
 export const useTagStore = defineStore('tag', () => {
-  const tags = ref<string[]>([
-    // '全部',
-    // '已完成',
-    // '未完成',
-    // '高优先级',
-    // '中优先级',
-    // '低优先级',
+  const _tags = useLocalStorage(APP_CONFIG.TagStorageKey, [
     '工作',
     '规划',
     '会议',
@@ -16,10 +11,18 @@ export const useTagStore = defineStore('tag', () => {
     '健康',
     '学习',
     '开发',
-    '社交',
-    '生活',
-    '娱乐',
-    '项目',
   ])
-  return { tags }
+  const addTag = (tag: string) => {
+    if (!tag && tag.trim().length === 0) return
+    if (!_tags.value.includes(tag)) {
+      _tags.value.push(tag)
+    }
+  }
+  const removeTag = (tag: string) => {
+    const index = _tags.value.indexOf(tag)
+    if (index !== -1) {
+      _tags.value.splice(index, 1)
+    }
+  }
+  return { tags: readonly(_tags), addTag, removeTag }
 })

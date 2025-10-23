@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import AppCalendar from '@/components/AppCalendar.vue'
 import ScheduleList from '@/components/Schedule/ScheduleList.vue'
-
 // const { date } = defineProps<{
 //   date: string
 // }>()

@@ -67,23 +67,22 @@ export const useScheduleFrom = (initialParam: ScheduleInitType, submitFunc: () =
   })
 
   const scheduleStore = useScheduleStore()
-
   const tagStore = useTagStore()
 
-  const addTags = (item: string) => {
-    if (!values.category) {
-      setFieldValue('category', [item])
-    } else if (!(values.category instanceof Array)) {
-      setFieldValue('category', [item])
-    } else if (!values.category.includes(item)) {
-      // values.category.push(item)
-      setFieldValue('category', [...values.category, item])
-    } else {
-      const newTags = values.category.filter((i: string) => i !== item)
-      setFieldValue('category', [...newTags])
-    }
-    console.log(values.category)
-  }
+  // const addTags = (item: string) => {
+  //   if (!values.category) {
+  //     setFieldValue('category', [item])
+  //   } else if (!(values.category instanceof Array)) {
+  //     setFieldValue('category', [item])
+  //   } else if (!values.category.includes(item)) {
+  //     // values.category.push(item)
+  //     setFieldValue('category', [...values.category, item])
+  //   } else {
+  //     const newTags = values.category.filter((i: string) => i !== item)
+  //     setFieldValue('category', [...newTags])
+  //   }
+  //   console.log(values.category)
+  // }
 
   const onSubmit = handleSubmit((validateValues) => {
     if (values.date === undefined) {
@@ -91,20 +90,6 @@ export const useScheduleFrom = (initialParam: ScheduleInitType, submitFunc: () =
       return
     }
     submitFunc()
-    // scheduleStore.setScheduleData(values.date, values)
-    // toast.success('添加日程成功', {
-    //   description: '1秒后跳转到日历页',
-    // })
-    // setTimeout(() => {
-    //   const defaultDate = today(getLocalTimeZone()).toString()
-    //   const from = (route.query?.date as string) || defaultDate
-    //   router.push({
-    //     name: 'calendar',
-    //     params: {
-    //       date: from,
-    //     },
-    //   })
-    // }, 1000)
   })
 
   const handleReturn = () => {
@@ -112,17 +97,53 @@ export const useScheduleFrom = (initialParam: ScheduleInitType, submitFunc: () =
     console.log(returnPath)
     router.push(returnPath as string)
   }
+
+  const categoryInput = ref('')
+  const addCategory = () => {
+    console.log(values.category)
+    if (!categoryInput.value || categoryInput.value.trim().length === 0) return
+    if (!values.category) {
+      setFieldValue('category', [categoryInput.value])
+      categoryInput.value = ''
+    } else if (!values.category.includes(categoryInput.value)) {
+      setFieldValue('category', [...values.category, categoryInput.value])
+      categoryInput.value = ''
+    }
+    tagStore.addTag(categoryInput.value)
+  }
+
+  const removeCategory = (item: string) => {
+    if (!values.category) return
+    const newTags = values.category.filter((i: string) => i !== item)
+    setFieldValue('category', [...newTags])
+  }
+
+  const addCategoryByClickTag = (text: string) => {
+    if (!text || text.trim().length === 0) {
+      return
+    }
+    if (!values.category) {
+      setFieldValue('category', [text])
+    } else if (!values.category.includes(text)) {
+      setFieldValue('category', [...values.category, text])
+    }
+  }
+
   return {
     onSubmit,
     handleReturn,
-    addTags,
+    // addTags,
     values,
     setFieldValue,
     formSchema,
-    tagStore,
+    // tagStore,
     scheduleStore,
     placeholder,
     value,
     df,
+    categoryInput,
+    addCategory,
+    removeCategory,
+    addCategoryByClickTag,
   }
 }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { APP_CONFIG } from '@/config/app';
 const currentFeatures = [
   '优化界面细节：图标、标题动态变化，提升用户体验',
   '新增「全部任务」页面：分类查看已完成 / 未完成日程',
@@ -19,7 +20,8 @@ const futurePlans = [
 </script>
 
 <template>
-  <div class="bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+  <div :style="{ height: `calc(100vh - ${APP_CONFIG.HeaderHeight + 5}px)` }" class="bg-gradient-to-br from-gray-50
+     to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto">
       <!-- 标题 -->
       <div class="text-center mb-12">
@@ -36,23 +38,10 @@ const futurePlans = [
           第二版本 · 当前功能
         </h2>
         <ul class="space-y-3 text-gray-700">
-          <li
-            v-for="(item, index) in currentFeatures"
-            :key="`current-${index}`"
-            class="flex items-start group"
-          >
-            <svg
-              class="w-5 h-5 text-green-500 mt-0.5 mr-2 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5 13l4 4L19 7"
-              ></path>
+          <li v-for="(item, index) in currentFeatures" :key="`current-${index}`" class="flex items-start group">
+            <svg class="w-5 h-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
             <span v-html="item"></span>
           </li>
@@ -60,31 +49,18 @@ const futurePlans = [
       </div>
 
       <!-- 后续规划 -->
-      <div
-        class="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl shadow-sm p-6 border border-indigo-100"
-      >
+      <div class="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl shadow-sm p-6 border border-indigo-100">
         <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
           <span class="inline-block w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
           未来规划 · 更智能的你
         </h2>
         <ul class="space-y-3 text-gray-700">
-          <li
-            v-for="(item, index) in futurePlans"
-            :key="`future-${index}`"
-            class="flex items-start group"
-          >
-            <svg
-              class="w-5 h-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              ></path>
+          <li v-for="(item, index) in futurePlans" :key="`future-${index}`" class="flex items-start group">
+            <svg class="w-5 h-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+              </path>
             </svg>
             <span v-html="item"></span>
           </li>
@@ -104,6 +80,7 @@ const futurePlans = [
 li {
   transition: transform 0.2s;
 }
+
 li:hover {
   transform: translateX(4px);
 }
