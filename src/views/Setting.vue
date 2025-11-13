@@ -46,9 +46,9 @@ const addCategory = () => {
 <template>
   <div class="mt-4 max-w-[760px] mx-auto">
     <p class="m-3 ml-4 text-gray-600">数据</p>
-    <ul class="bg-white p-4 rounded-2xl w-full flex flex-col gap-2 mb-5 border-2 border-gray-100">
+    <ul class="bg-white p-4 rounded-2xl w-full flex flex-col gap-2 mb-5 border">
       <li
-        class="flex items-center gap-4 border-b border-gray-100 pb-4 last:border-b-0 last:pb-0"
+        class="flex items-center gap-4 border-b pb-4 last:border-b-0 last:pb-0"
         v-for="item in dataItems"
         :key="item.text"
       >
@@ -67,9 +67,9 @@ const addCategory = () => {
       </li>
     </ul>
     <p class="m-3 ml-4 text-gray-600">关于</p>
-    <ul class="bg-white rounded-2xl w-full flex flex-col gap-2 mb-5 border-2 border-gray-100">
+    <ul class="bg-white rounded-2xl w-full flex flex-col gap-2 mb-5 border">
       <li
-        class="flex p-4 cursor-pointer transition-colors items-center gap-4 border-b border-gray-100 pb-4 last:border-b-0"
+        class="flex p-4 cursor-pointer transition-colors items-center gap-4 border-b pb-4 last:border-b-0"
         v-for="item in aboutItems"
         :key="item.text"
         @click="$router.push({ name: item.link })"
@@ -92,10 +92,8 @@ const addCategory = () => {
       </li>
     </ul>
     <p class="m-3 ml-4 text-gray-600">分类</p>
-    <ul class="bg-white rounded-2xl w-full flex flex-col gap-2 mb-5 border-2 border-gray-100">
-      <li
-        class="p-4 cursor-pointer transition-colors border-b border-gray-100 pb-4 last:border-b-0"
-      >
+    <ul class="bg-white rounded-2xl w-full flex flex-col gap-2 mb-5 border">
+      <li class="p-4 cursor-pointer transition-colors border-b pb-4 last:border-b-0">
         <div class="flex items-center gap-4">
           <div>
             <Tags />

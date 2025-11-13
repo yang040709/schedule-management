@@ -145,29 +145,20 @@ const setPriority = (priority: PriorityLevel) => {
 </script>
 
 <template>
-  <div class="w-full max-w-3xl mx-auto">
-    <div class="mb-6 rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
+  <div class="w-full max-w-[800px]">
+    <div class="mb-6 rounded-2xl border bg-white shadow-sm ring-1 ring-gray-100">
       <div class="flex flex-col gap-3 p-5 sm:p-6">
         <div class="flex items-center justify-between">
           <div class="flex gap-3">
             <span class="text-2xl sm:text-3xl font-bold text-gray-900">日程</span>
-            <div class="md:hidden">
-              <CalendarDrawer>
-                <!-- <span>选择日期</span> -->
-                <Button>{{ route.params.date }} </Button>
-                <!-- <span
-                  class="inline-flex cursor-pointer items-center rounded-full bg-gray-50 px-3 py-1 text-sm font-medium text-black border border-gray-200"
-                >
-                </span> -->
-              </CalendarDrawer>
-            </div>
-            <div class="hidden md:block">
+            <div class="flex items-center">
               <span
                 class="inline-flex items-center rounded-full bg-gray-50 px-3 py-1 text-sm font-medium text-black border border-gray-200"
               >
                 {{ route.params.date }}
               </span>
             </div>
+
             <!-- <span
               class="inline-flex items-center rounded-full bg-gray-50 px-3 py-1 text-sm font-medium text-black border border-gray-200"
             >
@@ -245,7 +236,7 @@ const setPriority = (priority: PriorityLevel) => {
 
     <div
       v-if="totalCount === 0"
-      class="rounded-2xl bg-white py-14 text-center shadow-sm ring-1 ring-gray-100"
+      class="rounded-2xl bg-white py-14 border text-center shadow-sm ring-1 ring-gray-100"
     >
       <div class="mx-auto w-full max-w-sm px-6">
         <h3 class="text-lg font-semibold text-gray-900">今天还没有日程</h3>
@@ -265,7 +256,7 @@ const setPriority = (priority: PriorityLevel) => {
     </div>
     <div
       v-else-if="totalCount !== 0 && events.length === 0"
-      class="rounded-2xl bg-white py-14 text-center shadow-sm ring-1 ring-gray-100"
+      class="rounded-2xl bg-white border py-14 text-center shadow-sm ring-1 ring-gray-100"
     >
       <div class="mx-auto w-full max-w-sm px-6">
         <h3 class="text-lg font-semibold text-gray-900">当前筛选条件还没有日程</h3>
@@ -284,7 +275,7 @@ const setPriority = (priority: PriorityLevel) => {
       </div>
     </div>
 
-    <div v-else class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
+    <div v-else class="rounded-2xl bg-white shadow-sm border ring-1 ring-gray-100">
       <div class="divide-y divide-gray-100">
         <div class="p-4 sm:p-5" v-for="ev in events" :key="ev.id">
           <ScheduleItem

@@ -5,6 +5,10 @@ import { APP_CONFIG } from '@/config/app'
 import type { RouteLocationAsRelativeGeneric } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { useModelStore } from '@/stores/model'
+import Avatar from './Avatar.vue'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 interface MyRouteLocationAsRelativeGeneric extends RouteLocationAsRelativeGeneric {
   name: string
 }
@@ -101,7 +105,12 @@ const todayLabel = new Intl.DateTimeFormat('zh-CN', {
           >
             {{ todayLabel }}
           </span>
-          <Button @click="modelStore.addModelOpen = true">新增日程</Button>
+          <!-- <Button @click="modelStore.addModelOpen = true">新增日程</Button> -->
+          <!-- <span>欢迎用户：Yang</span> -->
+          <Avatar v-if="userStore.isLogin" />
+          <RouterLink v-else class="text-gray-600 hover:text-blue-500 transition-colors" to="/login"
+            >未登录</RouterLink
+          >
         </div>
       </div>
     </div>

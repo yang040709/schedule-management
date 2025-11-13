@@ -10,12 +10,11 @@ const modelStore = useModelStore()
 </script>
 
 <template>
-  <div class="md:flex md:gap-4">
-    <div class="justify-center items-start hidden md:flex">
-      <AppCalendar class="w-[fit-content]" />
+  <div class="md:flex md:gap-8">
+    <ScheduleList class="flex-2" />
+    <div class="justify-center items-start mx-auto mt-10 md:mt-0 md:block md:w-[280px]">
+      <AppCalendar />
     </div>
-    <ScheduleList class="flex-1" />
-    <!-- <Button variant="outline" @click="modelStore.addModelOpen = true">新增日程</Button> -->
   </div>
 </template>
 
