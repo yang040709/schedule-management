@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import TagList from '@/components/Tag/TagList.vue';
-import Tags from '@/components/Tag/Tags.vue';
+import TagList from '@/components/Tag/TagList.vue'
+import Tags from '@/components/Tag/Tags.vue'
 import Header from './Header.vue'
+import AddSchedule from '@/components/AddSchedule.vue'
+import EditSchedule from '@/components/EditSchedule.vue'
 </script>
 
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50">
     <Header />
+    <AddSchedule />
+    <EditSchedule />
     <RouterView #default="{ Component, route }">
       <main v-if="route?.meta?.layout === 'full'">
         <component :is="Component" />

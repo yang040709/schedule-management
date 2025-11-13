@@ -49,23 +49,7 @@ const router = createRouter({
       name: 'schedule-list',
       component: () => import('@/views/ScheduleList.vue'),
     },
-    {
-      path: '/add-schedule',
-      name: 'addSchedule',
-      component: () => import('@/views/AddSchedule.vue'),
-      meta: {
-        title: '添加日程',
-      },
-    },
-    {
-      path: '/edit/:id',
-      name: 'edit',
-      props: true,
-      component: () => import('@/views/EditSchedule.vue'),
-      meta: {
-        title: '编辑日程',
-      },
-    },
+
     {
       path: '/setting',
       name: 'setting',

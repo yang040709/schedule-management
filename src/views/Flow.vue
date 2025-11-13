@@ -18,86 +18,82 @@ import { APP_CONFIG } from '@/config/app'
 const scheduleStore = useScheduleStore()
 const router = useRouter()
 
+const node1Id = getTemplateId()
+const node2Id = getTemplateId()
 const getDefaultNodes: () => Node<ScheduleEvent>[] = () => {
   return [
     {
-      id: 'yang-template-1', type: "schedule", position: { x: 0, y: 0 }, data: {
-        "id": getTemplateId(),
-        "title": "周计划制定",
-        "startTime": "09:00",
-        "endTime": "09:30",
-        "priority": "medium",
-        "category": [
-          "工作",
-          "规划"
-        ],
-        "completed": false,
-        "date": getTodayDate()
+      id: node1Id,
+      type: 'schedule',
+      position: { x: 0, y: 0 },
+      data: {
+        id: node1Id,
+        title: '周计划制定',
+        startTime: '09:00',
+        endTime: '09:30',
+        priority: 'medium',
+        category: ['工作', '规划'],
+        completed: false,
+        date: getTodayDate(),
       },
     },
     {
-      id: 'yang-template-2', type: "schedule", position: { x: 350, y: 280 }, data: {
-        "id": getTemplateId(),
-        "title": "拖拽右侧的节点到面板中",
-        "description": "这样就可以添加您的日程",
-        "priority": "medium",
-        "category": [
-          "工作",
-          "规划"
-        ],
-        "completed": false,
-        "date": getTodayDate()
+      id: node2Id,
+      type: 'schedule',
+      position: { x: 350, y: 280 },
+      data: {
+        id: node2Id,
+        title: '拖拽右侧的节点到面板中',
+        description: '这样就可以添加您的日程',
+        priority: 'medium',
+        category: ['工作', '规划'],
+        completed: false,
+        date: getTodayDate(),
       },
     },
   ]
 }
 const getDefauleEdges: () => Edge[] = () => {
-  return [
-    { id: 'e1-2', source: 'yang-template-1', target: 'yang-template-2', markerEnd: "arrowclosed" },
-  ]
+  return [{ id: getTemplateId(), source: node1Id, target: node2Id, markerEnd: 'arrowclosed' }]
 }
 
 const nodes = ref<Node<ScheduleEvent>[]>(getDefaultNodes())
 const edges = ref<Edge[]>(getDefauleEdges())
 
-const { onConnect, addEdges, fitView } = useVueFlow()
+const { onConnect, addEdges, fitView, nodes: vueFlowNodes } = useVueFlow()
 
 onConnect((params) => {
-  addEdges([{ ...params, id: getTemplateId(), markerEnd: "arrowclosed" }])
+  console.log('connect', params)
+  addEdges([{ ...params, id: getTemplateId(), markerEnd: 'arrowclosed' }])
 })
 
-const { onDrop, onDragOver, onDragLeave, isDragOver } = useDragAndDrop();
-
+const { onDrop, onDragOver, onDragLeave, isDragOver } = useDragAndDrop()
 
 const isSave = ref(false)
 const handleSave = () => {
   if (isSave.value) {
-    return;
+    return
   }
-  isSave.value = true;
-  console.log("save");
-  // console.log(nodes.value, edges.value);
-  nodes.value.forEach(node => {
-    console.log(node.data, "<===node");
+  isSave.value = true
+  nodes.value.forEach((node) => {
     if (!node.data) {
-      return;
+      return
     }
     scheduleStore.setScheduleData(node.data)
   })
-  // toast.success("保存成功，1秒后跳转到日历页")
-  // setTimeout(() => {
-  //   router.push("/");
-  //   isSave.value = false;
-  // }, 1000);
+  toast.success('保存成功，1秒后跳转到日历页')
+  setTimeout(() => {
+    router.push('/')
+    isSave.value = false
+  }, 1000)
 }
 const handleReset = async () => {
   nodes.value = getDefaultNodes()
   edges.value = getDefauleEdges()
-  await nextTick();
-  fitView();
-  toast.success("重置成功")
+  await nextTick()
+  fitView()
+  toast.success('重置成功')
 }
-
 
 const defaultViewport = {
   zoom: 0.8,
@@ -111,12 +107,19 @@ const defaultViewport = {
     <!-- :style="{ height: `calc(100vh - ${APP_CONFIG.HeaderHeight})` }" -->
     <FlowSideBar class="w-1/4" @save="handleSave" @reset="handleReset" />
 
-    <VueFlow v-model:nodes="nodes" v-model:edges="edges" :default-viewport="defaultViewport" @dragover="onDragOver"
-      @dragleave="onDragLeave" :style="{
+    <VueFlow
+      v-model:nodes="nodes"
+      v-model:edges="edges"
+      :default-viewport="defaultViewport"
+      @dragover="onDragOver"
+      @dragleave="onDragLeave"
+      :style="{
         backgroundColor: isDragOver ? '#e7f3ff' : 'transparent',
         transition: 'background-color 0.2s ease',
-        height: `calc(100vh - ${APP_CONFIG.HeaderHeight + 3}px)`
-      }" class="flex-1">
+        height: `calc(100vh - ${APP_CONFIG.HeaderHeight + 3}px)`,
+      }"
+      class="flex-1"
+    >
       <Background />
       <!-- <Controls /> -->
       <!-- <MiniMap /> -->
@@ -124,10 +127,6 @@ const defaultViewport = {
         <ScheduleNode v-bind="props" />
       </template>
     </VueFlow>
-
-  </div>
-  <div>
-    {{ nodes }}
   </div>
 </template>
 

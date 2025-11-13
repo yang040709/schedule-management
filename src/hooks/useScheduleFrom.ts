@@ -10,23 +10,18 @@ import {
   today,
 } from '@internationalized/date'
 
-import { computed, h, ref } from 'vue'
+import { computed, watch, ref } from 'vue'
 
 import { useTagStore } from '@/stores/tag'
 
 import { useScheduleStore } from '@/stores/schedule'
 
 import type { ScheduleEvent, ScheduleForm } from '@/types/schedule'
-import { useRouter, useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
-
 // interface
 type ScheduleInitType = ScheduleForm | (() => ScheduleForm)
 
-export const useScheduleFrom = (initialParam: ScheduleInitType, submitFunc: () => void) => {
-  const router = useRouter()
-  const route = useRoute()
-
+export const useScheduleFrom = (initialParam: ScheduleForm, submitFunc: () => void) => {
   const formSchema = toTypedSchema(
     z.object({
       title: z
@@ -49,24 +44,18 @@ export const useScheduleFrom = (initialParam: ScheduleInitType, submitFunc: () =
 
   const placeholder = ref()
 
-  let initialValues = null
-  if (typeof initialParam === 'function') {
-    initialValues = initialParam()
-  } else {
-    initialValues = initialParam
-  }
-
-  const { handleSubmit, setFieldValue, values } = useForm<ScheduleForm>({
+  const { handleSubmit, setFieldValue, values, isValidating } = useForm<ScheduleForm>({
     validationSchema: formSchema,
-    initialValues: initialValues,
+    initialValues: initialParam,
   })
+
+  // watch()
 
   const value = computed({
     get: () => (values.date ? parseDate(values.date) : undefined),
     set: (val) => val,
   })
 
-  const scheduleStore = useScheduleStore()
   const tagStore = useTagStore()
 
   // const addTags = (item: string) => {
@@ -84,18 +73,16 @@ export const useScheduleFrom = (initialParam: ScheduleInitType, submitFunc: () =
   //   console.log(values.category)
   // }
 
-  const onSubmit = handleSubmit((validateValues) => {
-    if (values.date === undefined) {
-      console.log('date is null')
+  const onSubmit = () => {
+    // console.log(isFieldValid());
+    console.log('isValidating', isValidating)
+    if (isValidating.value === false) {
+      toast.error('请填写完整表单,您有必填项未填写')
       return
     }
-    submitFunc()
-  })
-
-  const handleReturn = () => {
-    const returnPath = route.query?.from || '/'
-    console.log(returnPath)
-    router.push(returnPath as string)
+    handleSubmit(() => {
+      submitFunc()
+    })
   }
 
   const categoryInput = ref('')
@@ -131,13 +118,11 @@ export const useScheduleFrom = (initialParam: ScheduleInitType, submitFunc: () =
 
   return {
     onSubmit,
-    handleReturn,
     // addTags,
     values,
     setFieldValue,
     formSchema,
     // tagStore,
-    scheduleStore,
     placeholder,
     value,
     df,

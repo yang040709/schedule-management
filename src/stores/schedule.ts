@@ -37,10 +37,13 @@ export const useScheduleStore = defineStore('schedule', () => {
     console.log(schedule)
   }
   const updateScheduleData = (data: ScheduleEvent) => {
+    console.log(JSON.stringify(data), scheduleData.value, 'update<====', data)
     const index = scheduleData.value.findIndex((item) => item.id === data.id)
+    console.log(index)
     if (index > -1) {
       scheduleData.value.splice(index, 1)
     }
+    console.log(data, '<==update2')
     scheduleData.value.push(data)
   }
   const deleteScheduleData = (id: string) => {

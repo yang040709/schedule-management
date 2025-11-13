@@ -1,4 +1,4 @@
-<script setup lang='ts'>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import type { ScheduleEvent, PriorityLevel } from '@/types/schedule'
 import { Button } from '@/components/ui/button'
@@ -6,20 +6,16 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { X } from 'lucide-vue-next';
-import type { DateValue } from "@internationalized/date"
-import {
-  DateFormatter,
-  fromDate,
-  getLocalTimeZone,
-  parseDate
-} from "@internationalized/date"
-import { CalendarIcon } from "lucide-vue-next"
+import { X } from 'lucide-vue-next'
+import type { DateValue } from '@internationalized/date'
+import { DateFormatter, fromDate, getLocalTimeZone, parseDate } from '@internationalized/date'
+import { CalendarIcon } from 'lucide-vue-next'
 import { cn } from '@/lib/utils'
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { z } from 'zod'
 import { toast } from 'vue-sonner'
+import { cloneDeep } from 'lodash-es'
 
 // Props
 interface Props {
@@ -37,17 +33,16 @@ const props = withDefaults(defineProps<Props>(), {
     priority: 'medium' as PriorityLevel,
     category: [],
     completed: false,
-    date: ''
+    date: '',
   }),
-  onlyView: false
+  onlyView: false,
 })
 
 // console.log("props=>", props);
 
-
 // Emits
 const emit = defineEmits<{
-  update: [schedule: ScheduleEvent],
+  update: [schedule: ScheduleEvent]
   delete: [id: string]
 }>()
 
@@ -64,7 +59,7 @@ const formData = ref<ScheduleEvent>({
   priority: props.schedule.priority || '',
   category: props.schedule.category || [],
   completed: props.schedule.completed || false,
-  date: props.schedule.date || ''
+  date: props.schedule.date || '',
 })
 
 // 分类输入
@@ -91,13 +86,12 @@ const priorityColor = computed(() => {
   }
 })
 
-
 const scheduleSchema = z.object({
   title: z
     .string('标题不能为空且必须为字符串')
     .min(2, '标题不能少于2个字')
     .max(50, '标题不能超过50个字'),
-  description: z.string('描述不能为空且必须为字符串').min(1, "描述不能少于1个字"),
+  description: z.string('描述不能为空且必须为字符串').min(1, '描述不能少于1个字'),
   date: z.string().refine((v) => v, '请选择日期'),
   category: z.refine(() => true),
   priority: z.enum(['low', 'medium', 'high'], '请选择优先级'),
@@ -117,18 +111,23 @@ const toggleEdit = () => {
     if (!result.success) {
       if (result.error.issues.length > 0 && result.error.issues[0]) {
         toast.error(result.error.issues[0].message)
+      } else {
+        toast.error('表单类型错误，请检查表单')
       }
-      else {
-        toast.error("表单类型错误，请检查表单")
-      }
-      return;
+      return
     }
+    // console.log(props.schedule.id, formData.value)
+    const newFormData = cloneDeep(formData.value)
+    emit('update', newFormData)
   }
   isEditing.value = !isEditing.value
 }
 
 const addCategory = () => {
-  if (categoryInput.value.trim() && !formData.value.category?.includes(categoryInput.value.trim())) {
+  if (
+    categoryInput.value.trim() &&
+    !formData.value.category?.includes(categoryInput.value.trim())
+  ) {
     formData.value.category = [...(formData.value.category || []), categoryInput.value.trim()]
     categoryInput.value = ''
   }
@@ -140,50 +139,43 @@ const removeCategory = (index: number) => {
   }
 }
 
-
 const handleDelete = () => {
   emit('delete', props.schedule.id)
 }
 
-
-
-
-const df = new DateFormatter("en-US", {
-  dateStyle: "long",
+const df = new DateFormatter('en-US', {
+  dateStyle: 'long',
 })
 
-
-
-const neededDate = computed(
-  {
-    get: () => {
-      return parseDate(formData.value.date)
-    },
-    set: (date) => {
-      formData.value.date = date.toString()
-    }
-  }
-)
+const neededDate = computed({
+  get: () => {
+    return parseDate(formData.value.date)
+  },
+  set: (date) => {
+    formData.value.date = date.toString()
+  },
+})
 
 const pickDateText = computed(() => {
-  return formData.value.date ? formData.value.date : "Pick a date"
+  return formData.value.date ? formData.value.date : 'Pick a date'
 })
-
 </script>
 
 <template>
-  <div class="w-full relative p-4 rounded-2xl text-md border-2 transition-all duration-200 hover:shadow-md" :class="[
-    priorityColor,
-    formData.completed ? 'opacity-80' : ''
-  ]">
+  <div
+    class="w-full relative p-4 rounded-2xl text-md border-2 transition-all duration-200 hover:shadow-md"
+    :class="[priorityColor, formData.completed ? 'opacity-80' : '']"
+  >
     <!-- 显示模式 -->
     <div v-if="!isEditing || onlyView" class="space-y-2">
       <!-- 标题和完成状态 -->
       <div class="flex items-center gap-2">
-        <h3 class="font-medium text-gray-900 flex-1" :class="{ 'line-through': formData.completed }">
+        <h3
+          class="font-medium text-gray-900 flex-1"
+          :class="{ 'line-through': formData.completed }"
+        >
           {{ formData.title || '无标题' }}
         </h3>
-
       </div>
 
       <!-- 描述 -->
@@ -194,13 +186,15 @@ const pickDateText = computed(() => {
       <!-- 时间 -->
       <div v-if="timeDisplay" class="text-sm text-gray-500">
         {{ timeDisplay }}
-
       </div>
 
       <!-- 分类标签 -->
       <div v-if="formData.category && formData.category.length > 0" class="flex flex-wrap gap-1">
-        <span v-for="(cat, index) in formData.category" :key="index"
-          class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
+        <span
+          v-for="(cat, index) in formData.category"
+          :key="index"
+          class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full"
+        >
           {{ cat }}
         </span>
       </div>
@@ -208,11 +202,14 @@ const pickDateText = computed(() => {
       <!-- 优先级标识 -->
       <div class="flex items-center gap-1 text-xs">
         <span class="text-gray-500">优先级:</span>
-        <span class="px-2 py-1 rounded-full text-xs font-medium" :class="{
-          'bg-red-100 text-red-700': formData.priority === 'high',
-          'bg-yellow-100 text-yellow-700': formData.priority === 'medium',
-          'bg-green-100 text-green-700': formData.priority === 'low'
-        }">
+        <span
+          class="px-2 py-1 rounded-full text-xs font-medium"
+          :class="{
+            'bg-red-100 text-red-700': formData.priority === 'high',
+            'bg-yellow-100 text-yellow-700': formData.priority === 'medium',
+            'bg-green-100 text-green-700': formData.priority === 'low',
+          }"
+        >
           {{ formData.priority === 'high' ? '高' : formData.priority === 'medium' ? '中' : '低' }}
         </span>
       </div>
@@ -233,16 +230,27 @@ const pickDateText = computed(() => {
       <!-- 描述 -->
       <div class="space-y-2">
         <Label for="description">描述</Label>
-        <Textarea id="description" v-model="formData.description" placeholder="输入描述" class="w-full nodrag" rows="3" />
+        <Textarea
+          id="description"
+          v-model="formData.description"
+          placeholder="输入描述"
+          class="w-full nodrag"
+          rows="3"
+        />
       </div>
       <div class="space-y-2 no-drag">
         <Label for="description">日期</Label>
         <Popover>
           <PopoverTrigger as-child>
-            <Button variant="outline" :class="cn(
-              'w-[280px] justify-start text-left font-normal',
-              !formData.date && 'text-muted-foreground',
-            )">
+            <Button
+              variant="outline"
+              :class="
+                cn(
+                  'w-[280px] justify-start text-left font-normal',
+                  !formData.date && 'text-muted-foreground',
+                )
+              "
+            >
               <CalendarIcon class="mr-2 h-4 w-4" />
               {{ pickDateText }}
             </Button>
@@ -287,12 +295,20 @@ const pickDateText = computed(() => {
       <div class="space-y-2">
         <Label>分类标签</Label>
         <div class="flex gap-2">
-          <Input v-model="categoryInput" placeholder="输入分类" class="flex-1 nodrag" @keyup.enter="addCategory" />
+          <Input
+            v-model="categoryInput"
+            placeholder="输入分类"
+            class="flex-1 nodrag"
+            @keyup.enter="addCategory"
+          />
           <Button @click="addCategory" size="sm">添加</Button>
         </div>
         <div v-if="formData.category && formData.category.length > 0" class="flex flex-wrap gap-1">
-          <span v-for="(cat, index) in formData.category" :key="index"
-            class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full flex items-center gap-1">
+          <span
+            v-for="(cat, index) in formData.category"
+            :key="index"
+            class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full flex items-center gap-1"
+          >
             {{ cat }}
             <button @click="removeCategory(index)" class="text-gray-400 hover:text-red-500">
               <X class="w-4" />

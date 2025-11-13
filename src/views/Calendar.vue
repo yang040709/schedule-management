@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import AppCalendar from '@/components/AppCalendar.vue'
 import ScheduleList from '@/components/Schedule/ScheduleList.vue'
+import { Button } from '@/components/ui/button'
+import { useModelStore } from '@/stores/model'
 // const { date } = defineProps<{
 //   date: string
 // }>()
+const modelStore = useModelStore()
 </script>
 
 <template>
@@ -12,6 +15,7 @@ import ScheduleList from '@/components/Schedule/ScheduleList.vue'
       <AppCalendar class="w-[fit-content]" />
     </div>
     <ScheduleList class="flex-1" />
+    <!-- <Button variant="outline" @click="modelStore.addModelOpen = true">新增日程</Button> -->
   </div>
 </template>
 
