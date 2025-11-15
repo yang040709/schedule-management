@@ -152,11 +152,12 @@ const setPriority = (priority: PriorityLevel) => {
           <div class="flex gap-3">
             <span class="text-2xl sm:text-3xl font-bold text-gray-900">日程</span>
             <div class="flex items-center">
-              <span
+              <a
+                href="#app-calendar"
                 class="inline-flex items-center rounded-full bg-gray-50 px-3 py-1 text-sm font-medium text-black border border-gray-200"
               >
                 {{ route.params.date }}
-              </span>
+              </a>
             </div>
 
             <!-- <span

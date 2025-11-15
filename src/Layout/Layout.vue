@@ -4,6 +4,7 @@ import Tags from '@/components/Tag/Tags.vue'
 import Header from './Header.vue'
 import AddSchedule from '@/components/AddSchedule.vue'
 import EditSchedule from '@/components/EditSchedule.vue'
+import FooterNav from './FooterNav.vue'
 </script>
 
 <template>
@@ -15,11 +16,12 @@ import EditSchedule from '@/components/EditSchedule.vue'
       <main v-if="route?.meta?.layout === 'full'">
         <component :is="Component" />
       </main>
-      <main v-else class="p-4 max-w-[1200px] m-auto flex-1 w-full">
+      <main v-else class="p-4 flex m-auto max-w-[1200px] flex-1 w-full">
         <component :is="Component" />
       </main>
       <!-- <p>{{ route.meta }}</p> -->
     </RouterView>
+    <FooterNav />
     <!-- <TagList /> -->
   </div>
 </template>

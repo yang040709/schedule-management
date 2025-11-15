@@ -67,7 +67,7 @@ const priority = computed(() => {
 
     <!-- content -->
     <div class="min-w-0 flex-1">
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-wrap">
         <h4
           class="truncate text-sm font-semibold text-slate-900"
           :class="{ 'line-through text-slate-400': event.completed }"

@@ -69,11 +69,17 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('@/views/Login.vue'),
+      meta: {
+        layout: 'full',
+      },
     },
     {
       path: '/register',
       name: 'register',
       component: () => import('@/views/Register.vue'),
+      meta: {
+        layout: 'full',
+      },
     },
     {
       path: '/:catchAll(.*)',

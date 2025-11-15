@@ -44,7 +44,7 @@ const addCategory = () => {
 </script>
 
 <template>
-  <div class="mt-4 max-w-[760px] mx-auto">
+  <div class="mt-4 w-full mx-auto">
     <p class="m-3 ml-4 text-gray-600">数据</p>
     <ul class="bg-white p-4 rounded-2xl w-full flex flex-col gap-2 mb-5 border">
       <li

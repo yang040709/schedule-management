@@ -30,9 +30,10 @@ const modelValue = computed(() => {
 
 <template>
   <Calendar
+    id="app-calendar"
     :model-value="modelValue"
     @update:model-value="hanldeUpdate"
     :weekday-format="'short'"
-    class="bg-white rounded-md border"
+    class="bg-white rounded-md border shadow-sm"
   />
 </template>

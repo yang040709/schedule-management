@@ -13,3 +13,10 @@
   width: 5px;
   height: 5px;
 }
+
+html {
+  max-width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}

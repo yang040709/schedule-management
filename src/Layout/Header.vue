@@ -1,66 +1,12 @@
 <script setup lang="ts">
-// import logoSrc from '@/static/img/logo.png'
-import { useRoute } from 'vue-router'
 import { APP_CONFIG } from '@/config/app'
-import type { RouteLocationAsRelativeGeneric } from 'vue-router'
-import { Button } from '@/components/ui/button'
-import { useModelStore } from '@/stores/model'
 import Avatar from './Avatar.vue'
 import { useUserStore } from '@/stores/user'
-
+import { getTodayDate } from '@/utils/date'
+import { useNav } from '@/hooks/useNav'
 const userStore = useUserStore()
-interface MyRouteLocationAsRelativeGeneric extends RouteLocationAsRelativeGeneric {
-  name: string
-}
-
-interface NavList {
-  text: string
-  route: MyRouteLocationAsRelativeGeneric
-}
-
-const navList: NavList[] = [
-  {
-    text: '日程',
-    route: {
-      name: 'todayCalendar',
-    },
-  },
-  {
-    text: '流程',
-    route: {
-      name: 'flow',
-    },
-  },
-  {
-    text: '列表',
-    route: {
-      name: 'schedule-list',
-    },
-  },
-  {
-    text: '设置',
-    route: {
-      name: 'setting',
-    },
-  },
-]
-
-const route = useRoute()
-const isActive = (name: string) => {
-  if (name === 'todayCalendar' && route.name === 'calendar') {
-    return true
-  }
-  return route.name === name
-}
-
-const modelStore = useModelStore()
-
-const todayLabel = new Intl.DateTimeFormat('zh-CN', {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-  weekday: 'short',
-}).format(new Date())
+const { navList, isActive } = useNav()
+const todayLabel = getTodayDate()
 </script>
 
 <template>
