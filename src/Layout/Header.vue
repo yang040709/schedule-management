@@ -52,8 +52,8 @@ const todayLabel = getTodayDate()
             {{ todayLabel }}
           </span>
           <!-- <Button @click="modelStore.addModelOpen = true">新增日程</Button> -->
-          <!-- <span>欢迎用户：Yang</span> -->
           <Avatar v-if="userStore.isLogin" />
+          <span v-else-if="userStore.isLogin">正在加载中...</span>
           <RouterLink v-else class="text-gray-600 hover:text-blue-500 transition-colors" to="/login"
             >未登录</RouterLink
           >

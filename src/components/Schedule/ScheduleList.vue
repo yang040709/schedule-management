@@ -12,51 +12,175 @@ import { toast } from 'vue-sonner'
 import type { PriorityLevel } from '@/types/schedule'
 import { useModelStore } from '@/stores/model'
 import { cloneDeep } from 'lodash-es'
+import type { Schedule, ScheduleListQuery, ScheduleListResponse } from '@/types/schedule'
+import { ref } from 'vue'
+import { getScheduleListApi } from '@/api/schedule'
+import { useFetchData } from '@/hooks/useFetchData'
+
+const query = ref<ScheduleListQuery>({
+  // status: 'pending',
+  // priority: 'medium',
+  date: '2025-11-15',
+})
+
 const router = useRouter()
 const route = useRoute()
-
 const modelStore = useModelStore()
 
-const scheduleStore = useScheduleStore()
-const { scheduleData } = storeToRefs(scheduleStore)
-
-const selectDateSchedule = computed(() => {
-  return scheduleData.value || []
+const initialVal: ScheduleListResponse = {
+  total: 0,
+  data: [],
+}
+const { data, fetchData, loading } = useFetchData(getScheduleListApi, [query], initialVal)
+fetchData().then(() => {
+  console.log(data, '<===data')
 })
+// const { scheduleData } = storeToRefs(scheduleStore)
 
-console.log('scheduleList<==')
+// const selectDateSchedule = computed(() => {
+//   return scheduleData.value || []
+// })
 
-const events = computed(() => {
-  let scheduleList = scheduleData.value
-  // filter by date
-  scheduleList = scheduleList.filter((e) => e.date === route.params.date)
-  if (route.query.completed) {
-    const isCompleted = route.query.completed === 'true'
-    if (isCompleted) {
-      scheduleList = scheduleList?.filter((e) => e.completed) || []
-    } else {
-      scheduleList = scheduleList?.filter((e) => !e.completed) || []
-    }
-  }
-  // filter by priority
-  if (route.query.priority) {
-    const p = route.query.priority as 'high' | 'medium' | 'low'
-    scheduleList = scheduleList?.filter((e) => e.priority === p) || []
-  }
-  // filter by tag
-  if (route.query.tag) {
-    const tag = route.query.tag
-    scheduleList =
-      scheduleList?.filter((e) => e.category && e.category.includes(tag as string)) || []
-  }
-  return scheduleList || []
-})
+// console.log('scheduleList<==')
+
+// const scheduleList = ref<Schedule[]>([
+//   {
+//     id: 'sch-001',
+//     title: '团队周会',
+//     description: '讨论本周进度与下周计划',
+//     AIsuggestion: '建议提前准备项目进度报告',
+//     status: 'pending',
+//     priority: 'high',
+//     category: ['会议', '团队'],
+//     scheduleType: 'daily',
+//     recurrence: {
+//       startDate: '2025-11-17',
+//       endDate: '2025-12-29',
+//     },
+//     timeOfDay: {
+//       startTime: '10:00',
+//       endTime: '11:30',
+//     },
+//     createdAt: '2025-11-14T09:30:00Z',
+//     updatedAt: '2025-11-14T09:30:00Z',
+//   },
+//   {
+//     id: 'sch-002',
+//     title: '客户提案演示',
+//     description: '向ABC公司展示新产品方案',
+//     status: 'pending',
+//     priority: 'high',
+//     category: ['会议', '客户'],
+//     dependentId: 'sch-003',
+//     scheduleType: 'single',
+//     singleDate: '2025-11-20',
+//     timeOfDay: {
+//       startTime: '14:00',
+//       endTime: '15:30',
+//     },
+//     createdAt: '2025-11-14T10:15:00Z',
+//     updatedAt: '2025-11-14T10:15:00Z',
+//   },
+//   {
+//     id: 'sch-003',
+//     title: '提案材料准备',
+//     description: '完成ABC公司提案的PPT和文档',
+//     AIsuggestion: '建议重点突出成本优势和实施周期',
+//     status: 'in-progress',
+//     priority: 'high',
+//     category: ['工作', '准备'],
+//     scheduleType: 'single',
+//     singleDate: '2025-11-19',
+//     timeOfDay: {
+//       startTime: '09:00',
+//       endTime: '18:00',
+//     },
+//     createdAt: '2025-11-14T10:18:00Z',
+//     updatedAt: '2025-11-14T16:45:00Z',
+//   },
+//   {
+//     id: 'sch-004',
+//     title: '晨跑锻炼',
+//     description: '小区周边慢跑30分钟',
+//     status: 'pending',
+//     priority: 'medium',
+//     category: ['健康', '运动'],
+//     scheduleType: 'daily',
+//     recurrence: {
+//       startDate: '2025-11-15',
+//       endDate: '2025-11-30',
+//     },
+//     timeOfDay: {
+//       startTime: '06:30',
+//       endTime: '07:00',
+//     },
+//     createdAt: '2025-11-14T20:30:00Z',
+//     updatedAt: '2025-11-14T20:30:00Z',
+//   },
+//   {
+//     id: 'sch-005',
+//     title: '项目代码评审',
+//     description: '审核前端组件库重构代码',
+//     status: 'pending',
+//     priority: 'medium',
+//     category: ['工作', '技术'],
+//     scheduleType: 'single',
+//     singleDate: '2025-11-15',
+//     timeOfDay: {
+//       startTime: '13:00',
+//       endTime: '15:00',
+//     },
+//     createdAt: '2025-11-14T11:20:00Z',
+//     updatedAt: '2025-11-14T11:20:00Z',
+//   },
+//   {
+//     id: 'sch-006',
+//     title: '购买生日礼物',
+//     description: '为妈妈准备60岁生日礼物',
+//     AIsuggestion: '考虑珠宝或保健品，提前包装',
+//     status: 'pending',
+//     priority: 'medium',
+//     category: ['生活', '家庭'],
+//     scheduleType: 'single',
+//     singleDate: '2025-11-05',
+//     createdAt: '2025-11-14T14:50:00Z',
+//     updatedAt: '2025-11-14T14:50:00Z',
+//   },
+// ])
+
+// const events = computed(() => {
+//   let scheduleList = scheduleData.value
+//   // filter by date
+//   scheduleList = scheduleList.filter((e) => e.date === route.params.date)
+//   if (route.query.completed) {
+//     const isCompleted = route.query.completed === 'true'
+//     if (isCompleted) {
+//       scheduleList = scheduleList?.filter((e) => e.completed) || []
+//     } else {
+//       scheduleList = scheduleList?.filter((e) => !e.completed) || []
+//     }
+//   }
+//   // filter by priority
+//   if (route.query.priority) {
+//     const p = route.query.priority as 'high' | 'medium' | 'low'
+//     scheduleList = scheduleList?.filter((e) => e.priority === p) || []
+//   }
+//   // filter by tag
+//   if (route.query.tag) {
+//     const tag = route.query.tag
+//     scheduleList =
+//       scheduleList?.filter((e) => e.category && e.category.includes(tag as string)) || []
+//   }
+//   return scheduleList || []
+// })
 
 const totalCount = computed(
-  () => selectDateSchedule.value.filter((e) => e.date === route.params.date).length,
+  () => 100,
+  // () => selectDateSchedule.value.filter((e) => e.date === route.params.date).length,
 )
 const completedCount = computed(
-  () => selectDateSchedule.value.filter((e) => e.completed && e.date === route.params.date).length,
+  () => 100,
+  // () => selectDateSchedule.value.filter((e) => e.completed && e.date === route.params.date).length,
 )
 
 /*
@@ -64,20 +188,19 @@ const completedCount = computed(
 */
 
 const handleToggleComplete = (id: string) => {
-  scheduleStore.toggleScheduleData(id)
+  // scheduleStore.toggleScheduleData(id)
 }
 
 const handleEdit = (id: string) => {
-  const item = scheduleData.value.find((e) => e.id === id)
-  if (item) {
-    modelStore.editModelOpen = true
-    modelStore.editModelInfo = cloneDeep(item)
-  } else {
-    console.error('未找到该日程')
-  }
+  // const item = scheduleData.value.find((e) => e.id === id)
+  // if (item) {
+  //   modelStore.editModelOpen = true
+  //   modelStore.editModelInfo = cloneDeep(item)
+  // } else {
+  //   console.error('未找到该日程')
+  // }
 }
 const handleDelete = (id: string) => {
-  scheduleStore.deleteScheduleData(id)
   toast.success('删除成功')
 }
 
@@ -256,7 +379,7 @@ const setPriority = (priority: PriorityLevel) => {
       </div>
     </div>
     <div
-      v-else-if="totalCount !== 0 && events.length === 0"
+      v-else-if="totalCount !== 0 && data.data.length === 0"
       class="rounded-2xl bg-white border py-14 text-center shadow-sm ring-1 ring-gray-100"
     >
       <div class="mx-auto w-full max-w-sm px-6">
@@ -278,9 +401,9 @@ const setPriority = (priority: PriorityLevel) => {
 
     <div v-else class="rounded-2xl bg-white shadow-sm border ring-1 ring-gray-100">
       <div class="divide-y divide-gray-100">
-        <div class="p-4 sm:p-5" v-for="ev in events" :key="ev.id">
+        <div class="p-4 sm:p-5" v-for="ev in data.data" :key="ev.id">
           <ScheduleItem
-            :event="ev"
+            :item="ev"
             @toggle-complete="handleToggleComplete"
             @edit="handleEdit"
             @delete="handleDelete"

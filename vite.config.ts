@@ -17,6 +17,13 @@ const commonConfig = defineConfig({
   server: {
     host: true,
     port: 9463,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
   },
 })
 

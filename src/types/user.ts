@@ -1,6 +1,6 @@
-export interface User {
-  user_id: string
-  name: string
+export interface LoginResponse {
+  userId: string
+  username: string
   role: string
   token: string
 }
@@ -14,4 +14,10 @@ export interface RegisterFrom {
   username: string
   password: string
   confirmPassword: string
+}
+
+export interface User {
+  userId: string
+  username: string
+  role: string
 }

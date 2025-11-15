@@ -13,7 +13,7 @@ type ParseStatus = 'unparsed' | 'parsing' | 'success' | 'error'
 const userInput = ref('')
 const parseStatus = ref<ParseStatus>('unparsed') // 默认未解析状态
 
-const parseResult = ref<ScheduleForm>({
+const parseResult = ref({
   title: '',
   description: '',
   priority: 'high',
@@ -23,7 +23,7 @@ const parseResult = ref<ScheduleForm>({
 const errorMessage = ref('')
 
 // 模拟解析任务的函数
-const parseTask = (input: string): Promise<typeof parseResult.value> => {
+const parseTask = (input: string) => {
   return new Promise((resolve, reject) => {
     // 模拟网络请求延迟
     setTimeout(() => {
@@ -68,6 +68,7 @@ const handleSubmit = async () => {
   try {
     // 调用解析函数
     const result = await parseTask(userInput.value)
+    // @ts-ignore
     parseResult.value = result
     parseStatus.value = 'success'
   } catch (err) {
@@ -152,7 +153,7 @@ const cancelAdd = () => {
             <span class="text-gray-600">优先级：</span>
             <span class="font-medium text-warning">{{ parseResult.priority }}</span>
           </div>
-          <div v-if="parseResult.category?.length">
+          <!-- <div v-if="parseResult.category?.length">
             <span class="text-gray-600">类别：</span>
             <span class="font-medium">{{ parseResult.category }}</span>
           </div>
@@ -163,7 +164,7 @@ const cancelAdd = () => {
           <div v-if="parseResult.endTime">
             <span class="text-gray-600">结束时间：</span>
             <span class="font-medium">{{ parseResult.endTime }}</span>
-          </div>
+          </div> -->
         </div>
         <div class="button flex gap-x-4 mt-5 justify-between">
           <Button class="flex-1" @click="confirmAdd">确实添加</Button>
