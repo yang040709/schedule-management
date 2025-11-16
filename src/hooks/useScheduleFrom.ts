@@ -14,25 +14,35 @@ import { computed, watch, ref } from 'vue'
 
 import { useTagStore } from '@/stores/tag'
 
-import type { ScheduleEvent, ScheduleForm } from '@/types/schedule'
+import type { ScheduleForm } from '@/types/schedule'
 import { toast } from 'vue-sonner'
+import { getTodayDate } from '@/utils/date'
 // interface
 type ScheduleInitType = ScheduleForm | (() => ScheduleForm)
 
 export const useScheduleFrom = (initialParam: ScheduleForm, submitFunc: () => void) => {
   const formSchema = toTypedSchema(
     z.object({
-      title: z
-        .string('标题不能为空且必须为字符串')
-        .min(2, '标题不能少于2个字')
-        .max(50, '标题不能超过50个字'),
-      description: z.string('描述不能为空且必须为字符串'),
-      date: z.string('日期不能为空').refine((v) => v, '请选择日期'),
-      category: z.refine(() => true),
-      priority: z.enum(['low', 'medium', 'high'], '请选择优先级'),
-      completed: z.refine(() => true),
-      startTime: z.refine(() => true),
-      endTime: z.refine(() => true),
+      title: z.string().min(1, '标题不能为空'),
+      description: z.string().optional(),
+      priority: z.enum(['high', 'medium', 'low']),
+      category: z.array(z.string()).optional(),
+      dependentId: z.string().optional(),
+      timeOfDay: z
+        .object({
+          startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/, {
+            message: '开始时间格式应为 HH:mm 或 HH:mm:ss',
+          }),
+          endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/, {
+            message: '结束时间格式应为 HH:mm 或 HH:mm:ss',
+          }),
+        })
+        .optional(),
+
+      // 公共字段
+      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+        message: '日期格式应为 YYYY-MM-DD',
+      }),
     }),
   )
 
@@ -49,27 +59,16 @@ export const useScheduleFrom = (initialParam: ScheduleForm, submitFunc: () => vo
 
   // watch()
 
-  const value = computed({
-    get: () => (values.date ? parseDate(values.date) : undefined),
+  const singleDate = computed({
+    get: () => {
+      return values.date ? parseDate(values.date) : undefined
+    },
     set: (val) => val,
   })
 
-  const tagStore = useTagStore()
+  // const singleDate=ref(getTodayDate());
 
-  // const addTags = (item: string) => {
-  //   if (!values.category) {
-  //     setFieldValue('category', [item])
-  //   } else if (!(values.category instanceof Array)) {
-  //     setFieldValue('category', [item])
-  //   } else if (!values.category.includes(item)) {
-  //     // values.category.push(item)
-  //     setFieldValue('category', [...values.category, item])
-  //   } else {
-  //     const newTags = values.category.filter((i: string) => i !== item)
-  //     setFieldValue('category', [...newTags])
-  //   }
-  //   console.log(values.category)
-  // }
+  const tagStore = useTagStore()
 
   const onSubmit = async () => {
     const result = await validate()
@@ -128,13 +127,11 @@ export const useScheduleFrom = (initialParam: ScheduleForm, submitFunc: () => vo
 
   return {
     onSubmit,
-    // addTags,
     values,
     setFieldValue,
     formSchema,
-    // tagStore,
     placeholder,
-    value,
+    singleDate,
     df,
     categoryInput,
     addCategory,

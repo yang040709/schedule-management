@@ -3,211 +3,130 @@ import ScheduleItem from './ScheduleItem.vue'
 // import { useDateStore } from '@/stores/date'
 import { useScheduleStore } from '@/stores/schedule'
 import { storeToRefs } from 'pinia'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import TagList from '../Tag/TagList.vue'
 import { useRoute, useRouter } from 'vue-router'
 import CalendarDrawer from '../CalendarDrawer.vue'
 import { Button } from '../ui/button'
 import { toast } from 'vue-sonner'
-import type { PriorityLevel } from '@/types/schedule'
-import { useModelStore } from '@/stores/model'
+import type { PriorityLevel, ScheduleStatus } from '@/types/schedule'
+import { useAddModelStore } from '@/stores/addModel'
 import { cloneDeep } from 'lodash-es'
 import type { Schedule, ScheduleListQuery, ScheduleListResponse } from '@/types/schedule'
 import { ref } from 'vue'
-import { getScheduleListApi } from '@/api/schedule'
+import {
+  getScheduleListApi,
+  deleteScheduleApi,
+  getAISuggestApi,
+  modifyScheduleApi,
+} from '@/api/schedule'
 import { useFetchData } from '@/hooks/useFetchData'
-
-const query = ref<ScheduleListQuery>({
-  // status: 'pending',
-  // priority: 'medium',
-  date: '2025-11-15',
-})
-
+import { getTodayDate } from '@/utils/date'
+import { useEditModelStore } from '@/stores/editModel'
+import { getScheduleInitialData } from '@/constant'
 const router = useRouter()
 const route = useRoute()
-const modelStore = useModelStore()
+const addModelStore = useAddModelStore()
+const editModelStore = useEditModelStore()
 
 const initialVal: ScheduleListResponse = {
   total: 0,
   data: [],
 }
+
+const makeQuery: () => ScheduleListQuery = () => {
+  // interface
+  const statusList: (ScheduleStatus | undefined)[] = ['done', 'pending', 'expired', 'canceled']
+  let status: ScheduleStatus | undefined = undefined
+  let index = statusList.indexOf(status)
+  if (index !== -1 && statusList[index]) {
+    status = statusList[index]
+  }
+  const priorityList: (PriorityLevel | undefined)[] = ['high', 'medium', 'low']
+  let priority: PriorityLevel | undefined = undefined
+  index = priorityList.indexOf(priority)
+  if (index !== -1 && priorityList[index]) {
+    priority = priorityList[index]
+  }
+  return {
+    status,
+    priority,
+    date: route.params.date?.toString() || getTodayDate(),
+  }
+}
+
+const query = ref<ScheduleListQuery>(makeQuery())
+
 const { data, fetchData, loading } = useFetchData(getScheduleListApi, [query], initialVal)
 fetchData().then(() => {
   console.log(data, '<===data')
 })
-// const { scheduleData } = storeToRefs(scheduleStore)
 
-// const selectDateSchedule = computed(() => {
-//   return scheduleData.value || []
-// })
+watch([() => route.params.date, () => route.query.status, () => route.query.priority], (params) => {
+  console.log(params, '<==watch')
+  query.value = makeQuery()
+  fetchData()
+})
 
-// console.log('scheduleList<==')
-
-// const scheduleList = ref<Schedule[]>([
-//   {
-//     id: 'sch-001',
-//     title: '团队周会',
-//     description: '讨论本周进度与下周计划',
-//     AIsuggestion: '建议提前准备项目进度报告',
-//     status: 'pending',
-//     priority: 'high',
-//     category: ['会议', '团队'],
-//     scheduleType: 'daily',
-//     recurrence: {
-//       startDate: '2025-11-17',
-//       endDate: '2025-12-29',
-//     },
-//     timeOfDay: {
-//       startTime: '10:00',
-//       endTime: '11:30',
-//     },
-//     createdAt: '2025-11-14T09:30:00Z',
-//     updatedAt: '2025-11-14T09:30:00Z',
-//   },
-//   {
-//     id: 'sch-002',
-//     title: '客户提案演示',
-//     description: '向ABC公司展示新产品方案',
-//     status: 'pending',
-//     priority: 'high',
-//     category: ['会议', '客户'],
-//     dependentId: 'sch-003',
-//     scheduleType: 'single',
-//     singleDate: '2025-11-20',
-//     timeOfDay: {
-//       startTime: '14:00',
-//       endTime: '15:30',
-//     },
-//     createdAt: '2025-11-14T10:15:00Z',
-//     updatedAt: '2025-11-14T10:15:00Z',
-//   },
-//   {
-//     id: 'sch-003',
-//     title: '提案材料准备',
-//     description: '完成ABC公司提案的PPT和文档',
-//     AIsuggestion: '建议重点突出成本优势和实施周期',
-//     status: 'in-progress',
-//     priority: 'high',
-//     category: ['工作', '准备'],
-//     scheduleType: 'single',
-//     singleDate: '2025-11-19',
-//     timeOfDay: {
-//       startTime: '09:00',
-//       endTime: '18:00',
-//     },
-//     createdAt: '2025-11-14T10:18:00Z',
-//     updatedAt: '2025-11-14T16:45:00Z',
-//   },
-//   {
-//     id: 'sch-004',
-//     title: '晨跑锻炼',
-//     description: '小区周边慢跑30分钟',
-//     status: 'pending',
-//     priority: 'medium',
-//     category: ['健康', '运动'],
-//     scheduleType: 'daily',
-//     recurrence: {
-//       startDate: '2025-11-15',
-//       endDate: '2025-11-30',
-//     },
-//     timeOfDay: {
-//       startTime: '06:30',
-//       endTime: '07:00',
-//     },
-//     createdAt: '2025-11-14T20:30:00Z',
-//     updatedAt: '2025-11-14T20:30:00Z',
-//   },
-//   {
-//     id: 'sch-005',
-//     title: '项目代码评审',
-//     description: '审核前端组件库重构代码',
-//     status: 'pending',
-//     priority: 'medium',
-//     category: ['工作', '技术'],
-//     scheduleType: 'single',
-//     singleDate: '2025-11-15',
-//     timeOfDay: {
-//       startTime: '13:00',
-//       endTime: '15:00',
-//     },
-//     createdAt: '2025-11-14T11:20:00Z',
-//     updatedAt: '2025-11-14T11:20:00Z',
-//   },
-//   {
-//     id: 'sch-006',
-//     title: '购买生日礼物',
-//     description: '为妈妈准备60岁生日礼物',
-//     AIsuggestion: '考虑珠宝或保健品，提前包装',
-//     status: 'pending',
-//     priority: 'medium',
-//     category: ['生活', '家庭'],
-//     scheduleType: 'single',
-//     singleDate: '2025-11-05',
-//     createdAt: '2025-11-14T14:50:00Z',
-//     updatedAt: '2025-11-14T14:50:00Z',
-//   },
-// ])
-
-// const events = computed(() => {
-//   let scheduleList = scheduleData.value
-//   // filter by date
-//   scheduleList = scheduleList.filter((e) => e.date === route.params.date)
-//   if (route.query.completed) {
-//     const isCompleted = route.query.completed === 'true'
-//     if (isCompleted) {
-//       scheduleList = scheduleList?.filter((e) => e.completed) || []
-//     } else {
-//       scheduleList = scheduleList?.filter((e) => !e.completed) || []
-//     }
-//   }
-//   // filter by priority
-//   if (route.query.priority) {
-//     const p = route.query.priority as 'high' | 'medium' | 'low'
-//     scheduleList = scheduleList?.filter((e) => e.priority === p) || []
-//   }
-//   // filter by tag
-//   if (route.query.tag) {
-//     const tag = route.query.tag
-//     scheduleList =
-//       scheduleList?.filter((e) => e.category && e.category.includes(tag as string)) || []
-//   }
-//   return scheduleList || []
-// })
-
-const totalCount = computed(
-  () => 100,
-  // () => selectDateSchedule.value.filter((e) => e.date === route.params.date).length,
-)
-const completedCount = computed(
-  () => 100,
-  // () => selectDateSchedule.value.filter((e) => e.completed && e.date === route.params.date).length,
-)
+const totalCount = computed(() => data.value.data.length)
+const completedCount = computed(() => {
+  return data.value.data.filter((e) => e.status === 'done').length
+})
 
 /*
 处理各种事件
 */
 
-const handleToggleComplete = (id: string) => {
-  // scheduleStore.toggleScheduleData(id)
+const handleToggleComplete = async (id: string) => {
+  const item = data.value.data.find((e) => e.id === id)
+
+  if (!item) {
+    console.error('未找到该日程')
+    return
+  }
+  if (item.status === 'pending' || item.status === 'expired') {
+    item.status = 'done'
+  } else if (item.status === 'done') {
+    item.status = 'pending'
+  }
+  const { fetchData: modifyScheduleFetchData } = useFetchData(modifyScheduleApi, [id, item], {
+    schedule: getScheduleInitialData(),
+  })
+  await modifyScheduleFetchData()
 }
 
 const handleEdit = (id: string) => {
-  // const item = scheduleData.value.find((e) => e.id === id)
-  // if (item) {
-  //   modelStore.editModelOpen = true
-  //   modelStore.editModelInfo = cloneDeep(item)
-  // } else {
-  //   console.error('未找到该日程')
-  // }
+  const item = data.value.data.find((e) => e.id === id)
+  if (item) {
+    editModelStore.editModelOpen = true
+    editModelStore.editModelInfo = cloneDeep(item)
+  } else {
+    console.error('未找到该日程')
+  }
 }
-const handleDelete = (id: string) => {
-  toast.success('删除成功')
+
+const wantToDeleteId = ref<string>('')
+
+const { fetchData: deleteScheduleFetchData } = useFetchData(
+  deleteScheduleApi,
+  [wantToDeleteId],
+  undefined,
+)
+const handleDelete = async (id: string) => {
+  wantToDeleteId.value = id
+  try {
+    await deleteScheduleFetchData()
+    toast.success('删除成功')
+    fetchData()
+  } catch (error) {
+    toast.error('删除失败')
+  }
 }
 
 const handleAddNew = () => {
-  modelStore.addModelOpen = true
+  addModelStore.addModelOpen = true
   if (route.params.date) {
-    modelStore.addModelInfo.date = route.params.date.toString()
+    addModelStore.addModelInfo.date = route.params.date.toString()
   }
 }
 
@@ -228,7 +147,7 @@ const showCompletedSchedule = () => {
     params: route.params,
     query: {
       ...route.query,
-      completed: 'true',
+      status: 'done',
     },
   })
 }
@@ -239,7 +158,7 @@ const showUncompletedSchedule = () => {
     params: route.params,
     query: {
       ...route.query,
-      completed: 'false',
+      status: 'pending',
     },
   })
 }
@@ -265,6 +184,41 @@ const setPriority = (priority: PriorityLevel) => {
     },
   })
 }
+
+const generateAISuggest = async (id: string) => {
+  const { data: suggest, fetchData: fetchSuggestion } = useFetchData(getAISuggestApi, [id], {
+    suggestion: '',
+  })
+  const { data: modifiedSchedule, fetchData: modifySchedule } = useFetchData(
+    modifyScheduleApi,
+    [
+      id,
+      () => ({
+        AIsuggestion: suggest.value.suggestion,
+      }),
+    ],
+    {
+      schedule: getScheduleInitialData(),
+    },
+  )
+  await fetchSuggestion()
+  await modifySchedule()
+  await fetchData()
+}
+const removeAISuggest = async (id: string) => {
+  const { data: modifiedSchedule, fetchData: modifySchedule } = useFetchData(
+    modifyScheduleApi,
+    [
+      id,
+      {
+        AIsuggestion: '',
+      },
+    ],
+    undefined,
+  )
+  await modifySchedule()
+  await fetchData()
+}
 </script>
 
 <template>
@@ -282,14 +236,6 @@ const setPriority = (priority: PriorityLevel) => {
                 {{ route.params.date }}
               </a>
             </div>
-
-            <!-- <span
-              class="inline-flex items-center rounded-full bg-gray-50 px-3 py-1 text-sm font-medium text-black border border-gray-200"
-            >
-              
-                {{ route.params.date }}
-              
-            </span> -->
           </div>
 
           <Button @click="handleAddNew" variant="outline"> 新增日程 </Button>
@@ -407,6 +353,8 @@ const setPriority = (priority: PriorityLevel) => {
             @toggle-complete="handleToggleComplete"
             @edit="handleEdit"
             @delete="handleDelete"
+            @generate-ai-suggest="generateAISuggest"
+            @remove-ai-suggest="removeAISuggest"
           />
         </div>
       </div>

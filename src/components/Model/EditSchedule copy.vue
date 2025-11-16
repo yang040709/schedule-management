@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import {
   Dialog,
   DialogContent,
@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { useModelStore } from '@/stores/model'
+
 import { storeToRefs } from 'pinia'
 import { Button } from '@/components/ui/button'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -36,7 +36,7 @@ import { cloneDeep } from 'lodash-es'
 // const router = useRouter()
 const scheduleStore = useScheduleStore()
 const tagStore = useTagStore()
-const modelStore = useModelStore()
+
 const { editModelOpen, editModelInfo } = storeToRefs(modelStore)
 
 const submitFunc = () => {
@@ -270,4 +270,4 @@ const {
   </Dialog>
 </template>
 
-<style scoped></style>
+<style scoped></style> -->

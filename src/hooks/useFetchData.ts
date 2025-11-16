@@ -1,8 +1,8 @@
-import { ref } from 'vue'
-import type { Ref } from 'vue'
+import { ref, toValue } from 'vue'
+import type { Ref, MaybeRefOrGetter } from 'vue'
 
 type MakeRef<T extends any[]> = {
-  [K in keyof T]: Ref<T[K]>
+  [K in keyof T]: MaybeRefOrGetter<T[K]>
 }
 
 /**
@@ -59,7 +59,7 @@ export const useFetchData = <P extends any[], T>(
       let argsValue = []
       // 参数不为空
       if (args.length !== 0) {
-        argsValue = args.map((item) => item.value) as unknown as P
+        argsValue = args.map((item) => toValue(item)) as unknown as P
       } else {
         argsValue = args as P
       }
@@ -87,6 +87,7 @@ export const useFetchData = <P extends any[], T>(
       if (finallyConfig.handleErr) {
         finallyConfig.handleErr(err)
       }
+      throw err
     } finally {
       loading.value = false
     }

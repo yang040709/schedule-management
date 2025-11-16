@@ -49,7 +49,11 @@ const router = createRouter({
       name: 'schedule-list',
       component: () => import('@/views/ScheduleList.vue'),
     },
-
+    {
+      path: '/test',
+      name: 'test',
+      component: () => import('@/views/Test.vue'),
+    },
     {
       path: '/setting',
       name: 'setting',

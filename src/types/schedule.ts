@@ -1,7 +1,7 @@
 // 例如，优先级如果只有固定的几个级别
 export type PriorityLevel = 'high' | 'medium' | 'low'
 
-export type ScheduleStatus = 'done' | 'pending' | 'expired' | 'canceled' | 'in-progress'
+export type ScheduleStatus = 'done' | 'pending' | 'expired' | 'canceled'
 
 // // 或者分类名称预定义
 // // type CategoryTag = 'work' | 'personal' | 'health' | 'shopping';
@@ -40,7 +40,7 @@ export type ScheduleStatus = 'done' | 'pending' | 'expired' | 'canceled' | 'in-p
 
 */
 
-export interface Schedule {
+interface CommonScheduleFields {
   id: string
   title: string
   description: string
@@ -49,29 +49,52 @@ export interface Schedule {
   priority: PriorityLevel
   category?: string[]
   dependentId?: string // 依赖的任务ID
-
-  /* 
-  下面是时间相关的规则
-  */
-  // === 时间与重复规则 ===
-  scheduleType: 'single' | 'daily' // 单次 or 每日重复
-
-  // 单次任务：一个具体的日期（必填）
-  singleDate?: string // ISO 8601 日期，如 "2025-11-15"
-
-  // 重复任务：起止日期（闭区间）
-  recurrence?: {
-    startDate: string // "2025-11-01"
-    endDate: string // "2025-11-10"
-  }
-
-  // 所有任务共用的时间段（可选）
+  createdAt: string
+  updatedAt: string
   timeOfDay?: {
     startTime: string // "08:00" 或 "08:00:00"
     endTime: string // "09:00"
   }
+}
+
+// interface ScheduleSingle extends CommonScheduleFields {
+//   /*
+//   下面是时间相关的规则
+//   */
+//   // === 时间与重复规则 ===
+//   scheduleType: 'single' // 单次 or 每日重复
+//   // 单次任务：一个具体的日期（必填）
+//   singleDate: string // ISO 8601 日期，如 "2025-11-15"
+// }
+// interface ScheduleDaily extends CommonScheduleFields {
+//   /*
+//   下面是时间相关的规则
+//   */
+//   // === 时间与重复规则 ===
+//   scheduleType: 'daily' // 单次 or 每日重复
+//   // 重复任务：起止日期（闭区间）
+//   recurrence: {
+//     startDate: string // "2025-11-01"
+//     endDate: string // "2025-11-10"
+//   }
+// }
+
+export type Schedule = {
+  id: string
+  title: string
+  description: string
+  AIsuggestion?: string
+  status: ScheduleStatus
+  priority: PriorityLevel
+  category?: string[]
+  dependentId?: string // 依赖的任务ID
   createdAt: string
   updatedAt: string
+  date: string
+  timeOfDay?: {
+    startTime: string // "08:00" 或 "08:00:00"
+    endTime: string // "09:00"
+  }
 }
 
 export interface ScheduleListQuery {
@@ -97,14 +120,12 @@ export interface ScheduleForm {
   priority: 'high' | 'medium' | 'low'
   category?: string[]
   dependentId?: string // 依赖的任务ID
-  date: {
-    type: 'TimeRange' | 'exact'
-    timeRange?: {
-      startTime: string
-      endTime: string
-    }
-    exactTime?: string //'2023-01-01 00:00:00或者2023-01-01'两种格式
+  // 所有任务共用的时间段（可选）
+  timeOfDay?: {
+    startTime: string // "08:00" 或 "08:00:00"
+    endTime: string // "09:00"
   }
+  date: string
 }
 
 interface _ModifyScheduleForm {
@@ -115,14 +136,10 @@ interface _ModifyScheduleForm {
   priority: PriorityLevel
   category?: string[]
   dependentId?: string // 依赖的任务ID
-  date: {
-    type: 'TimeRange' | 'exact'
-    timeRange?: {
-      startTime: string
-      endTime: string
-    }
-    exactTime?: string
-    //这三个必须为 ISO 8601 字符串。若仅指定日期（如 "2023-01-01"），视为全天任务。'2023-01-01 00:00:00或者2023-01-01'两种格式
+  date: string
+  timeOfDay?: {
+    startTime: string // "08:00" 或 "08:00:00"
+    endTime: string // "09:00"
   }
 }
 

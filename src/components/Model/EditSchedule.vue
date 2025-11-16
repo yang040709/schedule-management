@@ -6,13 +6,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { useModelStore } from '@/stores/model'
+import { useAddModelStore } from '@/stores/addModel'
 import { storeToRefs } from 'pinia'
 import { Button } from '@/components/ui/button'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { X } from 'lucide-vue-next'
+import { X, WandSparkles } from 'lucide-vue-next'
 import { CalendarDate, getLocalTimeZone, today } from '@internationalized/date'
 import { CalendarIcon } from 'lucide-vue-next'
 import { toDate } from 'reka-ui/date'
@@ -22,57 +22,80 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import TagItem from '@/components/Tag/TagItem.vue'
 import { useScheduleStore } from '@/stores/schedule'
-import type { ScheduleForm } from '@/types/schedule'
+import type { ScheduleForm, ScheduleResponse } from '@/types/schedule'
 import { useRouter, useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { getTodayDate } from '@/utils/date'
 import { useScheduleFrom } from '@/hooks/useScheduleFrom'
 import Tags from '@/components/Tag/Tags.vue'
 import { useTagStore } from '@/stores/tag'
-import { watch } from 'vue'
+import { watch, ref, computed } from 'vue'
+import { useFetchData } from '@/hooks/useFetchData'
+import { modifyScheduleApi } from '@/api/schedule'
+import { getScheduleInitialData } from '@/constant'
+import { useEditModelStore } from '@/stores/editModel'
+import { useScheduleEditFrom } from '@/hooks/useScheduleEditFrom'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { getAISuggestByEditFormApi } from '@/api/schedule'
 
-// const route = useRoute()
-// const router = useRouter()
-const scheduleStore = useScheduleStore()
 const tagStore = useTagStore()
-const modelStore = useModelStore()
-const { addModelOpen, addModelInfo } = storeToRefs(modelStore)
+const modelStore = useEditModelStore()
+console.log(modelStore.editModelOpen, modelStore.editModelInfo, '<===modelStore')
 
-const submitFunc = () => {
-  scheduleStore.setScheduleData(values)
+const { editModelOpen, editModelInfo } = storeToRefs(modelStore)
+
+const initResponse: ScheduleResponse = {
+  schedule: getScheduleInitialData(),
+}
+
+const params = computed(() => {
+  return values
+})
+
+const { data, loading, fetchData } = useFetchData(
+  modifyScheduleApi,
+  [() => editModelInfo.value.id, params],
+  initResponse,
+)
+
+const submitFunc = async () => {
+  // scheduleStore.setScheduleData(values)
+  await fetchData()
   toast.success('添加日程成功', {
     description: '1秒后跳转到日历页',
   })
-  addModelOpen.value = false
-  // setTimeout(() => {
-  //   const defaultDate = getTodayDate();
-  //   const from = (route.query?.date as string) || defaultDate
-  //   router.push({
-  //     name: 'calendar',
-  //     params: {
-  //       date: from,
-  //     },
-  //   })
-  // }, 1000)
-}
-const initValue: ScheduleForm = {
-  // date: (route.query?.date || getTodayDate()) as string,
-  date: addModelInfo.value.date || getTodayDate(),
-  title: '',
-  description: '',
-  category: [],
-  priority: 'high',
-  completed: false,
-  startTime: undefined,
-  endTime: undefined,
+  editModelOpen.value = false
 }
 
+const initValue = {}
+
+// watch(
+//   () => addModelInfo.value.date,
+//   () => {
+//     if (addModelInfo.value.date) {
+//       setFieldValue('date', addModelInfo.value.date)
+//     }
+//   },
+// )
+
 watch(
-  () => addModelInfo.value.date,
+  () => editModelInfo.value,
   () => {
-    if (addModelInfo.value.date) {
-      setFieldValue('date', addModelInfo.value.date)
+    setFieldValue('id' as keyof ScheduleForm, editModelInfo.value.id)
+    setFieldValue('date', editModelInfo.value.date)
+    setFieldValue('title', editModelInfo.value.title)
+    setFieldValue('description', editModelInfo.value.description)
+    setFieldValue('category', editModelInfo.value.category)
+    setFieldValue('priority', editModelInfo.value.priority)
+    setFieldValue('status', editModelInfo.value.status)
+    setFieldValue('dependentId', editModelInfo.value.dependentId)
+    setFieldValue('AIsuggestion', editModelInfo.value.AIsuggestion)
+    if (editModelInfo.value.timeOfDay) {
+      setFieldValue('timeOfDay', editModelInfo.value.timeOfDay)
     }
+  },
+  {
+    deep: true,
   },
 )
 
@@ -81,22 +104,35 @@ const {
   values,
   setFieldValue,
   placeholder,
-  value,
+  singleDate,
   df,
   categoryInput,
   addCategory,
   removeCategory,
   addCategoryByClickTag,
-} = useScheduleFrom(initValue, submitFunc)
+} = useScheduleEditFrom(submitFunc)
+
+const {
+  data: suggestion,
+  loading: loadingSuggestion,
+  fetchData: fetchSuggestion,
+} = useFetchData(getAISuggestByEditFormApi, [() => editModelInfo.value.id, () => values], {
+  suggestion: '',
+})
+
+const generateAISuggestion = async () => {
+  await fetchSuggestion()
+  setFieldValue('AIsuggestion', suggestion.value.suggestion)
+}
 </script>
 <template>
-  <Dialog v-model:open="addModelOpen">
+  <Dialog v-model:open="editModelOpen">
     <DialogContent
       class="sm:max-w-[425px] md:max-w-[600px] lg:max-w-[800px] h-[90vh] overflow-hidden"
     >
       <DialogHeader>
-        <DialogTitle>添加新日程</DialogTitle>
-        <DialogDescription> 添加您的新日程 </DialogDescription>
+        <DialogTitle>修改日程</DialogTitle>
+        <DialogDescription> 修改您的日程 </DialogDescription>
       </DialogHeader>
       <div class="overflow-y-scroll mr-[-10px] pr-[10px] p-[2px]">
         <form @submit.prevent="onSubmit" class="space-y-5">
@@ -116,10 +152,51 @@ const {
           </FormField>
           <FormField v-slot="{ componentField }" name="description">
             <FormItem class="space-y-2">
-              <FormLabel class="text-base font-medium">描述</FormLabel>
+              <FormLabel class="text-base font-medium">
+                描述
+                <!-- <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger as-child>
+                      <Button variant="outline">
+                        <WandSparkles />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>点击使用大模型生成描述</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider> -->
+              </FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="请输入描述信息"
+                  class="min-h-[100px] rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all resize-y"
+                  v-bind="componentField"
+                />
+              </FormControl>
+              <FormMessage class="text-sm" />
+            </FormItem>
+          </FormField>
+          <FormField v-slot="{ componentField }" name="AIsuggestion">
+            <FormItem class="space-y-2">
+              <FormLabel class="text-base font-medium">
+                行动建议
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger as-child>
+                      <Button type="button" variant="outline" @click="generateAISuggestion">
+                        <WandSparkles />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>点击生成行动建议</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="修改行动建议"
                   class="min-h-[100px] rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all resize-y"
                   v-bind="componentField"
                 />
@@ -138,11 +215,11 @@ const {
                       :class="
                         cn(
                           'w-full h-11 justify-between ps-4 font-medium border-gray-300 hover:border-blue-500 transition-all',
-                          !value && 'text-muted-foreground',
+                          !singleDate && 'text-muted-foreground',
                         )
                       "
                     >
-                      <span>{{ value ? df.format(toDate(value)) : '选择日期' }}</span>
+                      <span>{{ singleDate ? df.format(toDate(singleDate)) : '选择日期' }}</span>
                       <CalendarIcon class="ms-2 h-5 w-5 opacity-70" />
                     </Button>
                     <input hidden />
@@ -151,7 +228,7 @@ const {
                 <PopoverContent class="w-auto p-0 rounded-lg shadow-lg border-0">
                   <Calendar
                     v-model:placeholder="placeholder"
-                    :model-value="value"
+                    :model-value="singleDate"
                     calendar-label="选择日期"
                     initial-focus
                     :min-value="new CalendarDate(2000, 1, 1)"
@@ -261,10 +338,13 @@ const {
           </FormField>
           <div class="pt-4">
             <Button
+              :disabled="loading"
               type="submit"
               class="w-full h-12 text-white font-medium rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-              >添加</Button
             >
+              <template v-if="!loading"> 添加 </template>
+              <template v-else> 添加中... </template>
+            </Button>
           </div>
         </form>
       </div>

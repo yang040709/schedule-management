@@ -2,13 +2,11 @@
 import AppCalendar from '@/components/AppCalendar.vue'
 import ScheduleList from '@/components/Schedule/ScheduleList.vue'
 import { Button } from '@/components/ui/button'
-import { useModelStore } from '@/stores/model'
 import IntelligentTaskInput from '@/components/IntelligentTaskInput/IntelligentTaskInput.vue'
 
 // const { date } = defineProps<{
 //   date: string
 // }>()
-const modelStore = useModelStore()
 </script>
 
 <template>

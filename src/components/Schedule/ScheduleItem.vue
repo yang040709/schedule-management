@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Schedule } from '@/types/schedule'
+import type { Schedule, ScheduleStatus } from '@/types/schedule'
 import { computed } from 'vue'
 import { List } from 'lucide-vue-next'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -7,14 +7,18 @@ import { Button } from '@/components/ui/button'
 import DeleteDialog from './DeleteDialog.vue'
 import dayjs from 'dayjs'
 import { getTodayDate } from '@/utils/date'
+import { useDetailModelStore } from '@/stores/detailModel'
 
 const props = defineProps<{ item: Schedule }>()
+const detailModelStore = useDetailModelStore()
 
 const emit = defineEmits<{
   (e: 'toggle-complete', id: string): void
   (e: 'click', id: string): void
   (e: 'edit', id: string): void
   (e: 'delete', id: string): void
+  (e: 'generate-ai-suggest', id: string): void
+  (e: 'remove-ai-suggest', id: string): void
 }>()
 
 function onToggleComplete(e: Event) {
@@ -51,27 +55,58 @@ const priority = computed(() => {
 })
 
 const relativeSingleTime = computed(() => {
-  if (props.item.singleDate === getTodayDate()) {
+  if (props.item.date === getTodayDate()) {
     return '今天'
   } else {
-    return dayjs().to(dayjs(props.item.singleDate))
+    return dayjs().to(dayjs(props.item.date))
   }
 })
 
-const recurrenceFormat = computed(() => {
-  if (!props.item.recurrence) {
-    throw new Error(' recurrence is null')
+// 'done' | 'pending' | 'expired' | 'canceled' | 'in-progress'
+type StatusMap = {
+  [K in ScheduleStatus]: {
+    class: string
+    text: string
+    color: string
   }
-  const startDate = dayjs(props.item.recurrence.startDate)
-  const endDate = dayjs(props.item.recurrence.endDate)
-  const prefix = '时间范围'
+}
+const statusMap: StatusMap = {
+  done: {
+    class: 'px-3 py-1 text-xs font-bold border-1 text-green-600 bg-green-50',
+    text: '已完成',
+    color: 'green-50',
+  },
+  pending: {
+    class: 'px-3 py-1 text-xs font-bold border-1 text-yellow-600 bg-yellow-100',
+    text: '待处理',
+    color: 'yellow-100',
+  },
+  expired: {
+    class: 'px-3 py-1 text-xs font-bold border-1 text-red-600 bg-red-50',
+    text: '已过期',
+    color: 'red-50',
+  },
+  canceled: {
+    class: 'px-3 py-1 text-xs font-bold border-1 text-red-600 bg-red-100',
+    text: '已取消',
+    color: 'red-100',
+  },
+}
 
-  if (startDate.isSame(endDate, 'year')) {
-    return `${prefix}：${startDate.format('MM-DD')} - ${endDate.format('MM-DD')}`
-  } else {
-    return `${prefix}：${startDate.format('YYYY-MM-DD')} - ${endDate.format('YYYY-MM-DD')}`
-  }
-})
+const generateAISuggest = async () => {
+  emit('generate-ai-suggest', props.item.id)
+}
+
+const removeAISuggest = () => {
+  emit('remove-ai-suggest', props.item.id)
+}
+
+const showDetail = () => {
+  console.log('showDetail')
+
+  detailModelStore.schedule = props.item
+  detailModelStore.isOpen = true
+}
 
 // const
 </script>
@@ -92,6 +127,7 @@ const recurrenceFormat = computed(() => {
         :class="item.status === 'done' ? 'bg-blue-500' : ''"
       ></span>
     </button>
+    <!-- <Button>开始任务</Button> -->
     <!-- <input type="checkbox" :checked="item.status === 'done'" @change="onToggleComplete" /> -->
 
     <!-- content -->
@@ -123,17 +159,12 @@ const recurrenceFormat = computed(() => {
         <span class="px-3 py-1 text-xs font-bold bg-lime-100 text-lime-600" v-if="item.timeOfDay">
           {{ item.timeOfDay?.startTime }} - {{ item.timeOfDay?.endTime }}
         </span>
-        <span
-          v-if="item.scheduleType === 'single' && item.singleDate"
-          class="px-3 py-1 text-xs font-bold bg-cyan-100 text-cyan-600"
-        >
+        <span class="px-3 py-1 text-xs font-bold bg-cyan-100 text-cyan-600">
           {{ relativeSingleTime }}
         </span>
-        <span
-          v-if="item.scheduleType === 'daily'"
-          class="px-3 py-1 text-xs font-bold bg-cyan-100 text-cyan-600"
-        >
-          {{ recurrenceFormat }}
+
+        <span :class="statusMap[item.status].class">
+          {{ statusMap[item.status].text }}
         </span>
       </div>
       <!-- <div class="mt-2 flex gap-x-2">
@@ -157,25 +188,66 @@ const recurrenceFormat = computed(() => {
         <span class="font-medium">行动建议：</span>
         {{ item.AIsuggestion }}
       </div>
+      <div class="mt-4 flex gap-2 flex-wrap">
+        <button
+          class="px-3 py-1 bg-gray-200 text-gray-800 rounded text-sm hover:bg-gray-300 transition-colors"
+          @click="handleEdit"
+        >
+          编辑
+        </button>
+        <button
+          class="px-3 py-1 bg-[#3B82F6] text-white rounded text-sm hover:bg-[#3B82F6]/90 transition-colors"
+          @click="showDetail"
+        >
+          详情
+        </button>
+        <!-- <button
+          class="px-3 py-1 bg-gray-200 text-gray-800 rounded text-sm hover:bg-gray-300 transition-colors"
+        >
+          其他操作
+        </button> -->
+        <Popover>
+          <PopoverTrigger @click.stop class="h-fit">
+            <span
+              class="px-3 py-1 bg-gray-200 text-gray-800 rounded text-sm hover:bg-gray-300 transition-colors"
+            >
+              其他操作
+            </span>
+          </PopoverTrigger>
+          <PopoverContent class="w-auto">
+            <div class="flex flex-col gap-3">
+              <Button variant="secondary" @click="generateAISuggest">生成行动建议</Button>
+              <Button variant="secondary" @click="removeAISuggest">移除行动建议</Button>
+              <!-- <Button variant="secondary" @click="handleEdit">编辑</Button> -->
+              <DeleteDialog @confirm="$emit('delete', item.id)">
+                <Button variant="destructive">删除</Button>
+              </DeleteDialog>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+      <!-- <Button>开始任务</Button> -->
     </div>
-    <div class="flex flex-col items-center justify-center">
+    <div class="flex flex-col">
+      <span class="text-xs text-gray-500">ID: {{ item.id }}</span>
+    </div>
+    <!-- <div class="flex flex-col justify-center">
       <Popover>
         <PopoverTrigger @click.stop class="h-fit">
-          <!-- <List class="font-md text-slate-400 mr-1" /> -->
           <span class="bg-slate-100 py-2 px-8 rounded-md font-medium text-center"> 操作 </span>
         </PopoverTrigger>
         <PopoverContent class="w-auto">
           <div class="flex flex-col gap-3">
-            <Button variant="secondary">生成行动建议</Button>
-            <Button variant="secondary">移除行动建议</Button>
+            <Button variant="secondary" @click="generateAISuggest">生成行动建议</Button>
+            <Button variant="secondary" @click="removeAISuggest">移除行动建议</Button>
             <Button variant="secondary" @click="handleEdit">编辑</Button>
             <DeleteDialog @confirm="$emit('delete', item.id)">
-              <Button variant="destructive" @click.pritem>删除</Button>
+              <Button variant="destructive">删除</Button>
             </DeleteDialog>
           </div>
         </PopoverContent>
       </Popover>
-    </div>
+    </div> -->
   </div>
 </template>
 

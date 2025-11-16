@@ -2,14 +2,16 @@
 import TagList from '@/components/Tag/TagList.vue'
 import Tags from '@/components/Tag/Tags.vue'
 import Header from './Header.vue'
-import AddSchedule from '@/components/AddSchedule.vue'
-import EditSchedule from '@/components/EditSchedule.vue'
+import AddSchedule from '@/components/Model/AddSchedule.vue'
+import EditSchedule from '@/components/Model/EditSchedule.vue'
+import ScheduleDetail from '@/components/Model/ScheduleDetail.vue'
 import FooterNav from './FooterNav.vue'
 </script>
 
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50">
     <Header />
+    <ScheduleDetail />
     <AddSchedule />
     <EditSchedule />
     <RouterView #default="{ Component, route }">

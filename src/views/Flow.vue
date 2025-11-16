@@ -8,33 +8,33 @@ import ScheduleNode from '@/components/Flow/ScheduleNode.vue'
 import FlowSideBar from '@/components/Flow/FlowSideBar.vue'
 import { ref, nextTick } from 'vue'
 import useDragAndDrop from '@/hooks/useDnD'
-import type { ScheduleEvent } from '@/types/schedule'
+import type { Schedule, ScheduleForm } from '@/types/schedule'
 import { getTemplateId } from '@/utils'
 import { toast } from 'vue-sonner'
 import { getTodayDate } from '@/utils/date'
 import { useScheduleStore } from '@/stores/schedule'
 import { useRouter } from 'vue-router'
 import { APP_CONFIG } from '@/config/app'
-const scheduleStore = useScheduleStore()
+
+// const scheduleStore = useScheduleStore()
 const router = useRouter()
 
 const node1Id = getTemplateId()
 const node2Id = getTemplateId()
-const getDefaultNodes: () => Node<ScheduleEvent>[] = () => {
+const getDefaultNodes: () => Node<ScheduleForm>[] = () => {
   return [
     {
       id: node1Id,
       type: 'schedule',
       position: { x: 0, y: 0 },
       data: {
-        id: node1Id,
         title: '周计划制定',
-        startTime: '09:00',
-        endTime: '09:30',
+        description: '制定周计划，包括工作和规划',
         priority: 'medium',
         category: ['工作', '规划'],
-        completed: false,
         date: getTodayDate(),
+        // completed: false,
+        // state:"",
       },
     },
     {
@@ -42,12 +42,10 @@ const getDefaultNodes: () => Node<ScheduleEvent>[] = () => {
       type: 'schedule',
       position: { x: 350, y: 280 },
       data: {
-        id: node2Id,
         title: '拖拽右侧的节点到面板中',
         description: '这样就可以添加您的日程',
-        priority: 'medium',
+        priority: 'low',
         category: ['工作', '规划'],
-        completed: false,
         date: getTodayDate(),
       },
     },
@@ -57,7 +55,7 @@ const getDefauleEdges: () => Edge[] = () => {
   return [{ id: getTemplateId(), source: node1Id, target: node2Id, markerEnd: 'arrowclosed' }]
 }
 
-const nodes = ref<Node<ScheduleEvent>[]>(getDefaultNodes())
+const nodes = ref<Node<ScheduleForm>[]>(getDefaultNodes())
 const edges = ref<Edge[]>(getDefauleEdges())
 
 const { onConnect, addEdges, fitView, nodes: vueFlowNodes } = useVueFlow()
@@ -79,7 +77,7 @@ const handleSave = () => {
     if (!node.data) {
       return
     }
-    scheduleStore.setScheduleData(node.data)
+    // scheduleStore.setScheduleData(node.data)
   })
   toast.success('保存成功，1秒后跳转到日历页')
   setTimeout(() => {

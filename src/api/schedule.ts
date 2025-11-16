@@ -42,15 +42,23 @@ export const deleteScheduleApi = (id: string) => {
 
 export const generateScheduleApi = (data: GenerateSchedule) => {
   return request({
-    url: '/schedule/generate',
+    url: '/schedule/ai/generate',
     method: 'post',
     data,
-  }) as Promise<ScheduleResponse>
+  }) as Promise<ScheduleForm>
 }
 
 export const getAISuggestApi = (id: string) => {
   return request({
-    url: `/schedule/${id}/suggest`,
+    url: `/schedule/${id}/ai/suggest`,
     method: 'get',
+  }) as Promise<AISuggest>
+}
+
+export const getAISuggestByEditFormApi = (id: string, from: ModifyScheduleForm) => {
+  return request({
+    url: `/schedule/${id}/ai/suggest-by-edit`,
+    method: 'post',
+    data: from,
   }) as Promise<AISuggest>
 }

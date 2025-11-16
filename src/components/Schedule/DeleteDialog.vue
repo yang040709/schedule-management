@@ -9,14 +9,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { ref } from 'vue'
 
-defineEmits<{
+const emit = defineEmits<{
   confirm: []
 }>()
+
+const isOpen = ref(false)
+
+const confirm = async () => {
+  emit('confirm')
+  isOpen.value = false
+}
 </script>
 
 <template>
-  <Dialog>
+  <Dialog v-model:open="isOpen">
     <DialogTrigger as-child>
       <slot>
         <Button variant="destructive"> 删除 </Button>
@@ -28,7 +36,7 @@ defineEmits<{
         <DialogDescription> 确定要删除这个日程吗？ </DialogDescription>
       </DialogHeader>
       <DialogFooter>
-        <Button @click="$emit('confirm')"> 确认 </Button>
+        <Button @click="confirm"> 确认 </Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

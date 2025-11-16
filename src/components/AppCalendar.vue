@@ -1,17 +1,14 @@
 <script setup lang="ts">
 import { Calendar } from '@/components/ui/calendar'
-// import { useDateStore } from '@/stores/date'
 import { useRoute } from 'vue-router'
-import { parseDate } from '@internationalized/date'
+import { fromDate, getLocalTimeZone, parseDate } from '@internationalized/date'
+import type { DateValue } from '@internationalized/date'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 
-const hanldeUpdate = (date: any) => {
-  /* 
-  防止date为未定义，从而报错
-  */
+const handleUpdate = (date: any) => {
   if (!date) {
     return
   }
@@ -24,16 +21,18 @@ const hanldeUpdate = (date: any) => {
 }
 
 const modelValue = computed(() => {
-  return parseDate(route.params.date as string)
+  return fromDate(new Date(route.params.date as string), getLocalTimeZone())
 })
 </script>
 
 <template>
-  <Calendar
-    id="app-calendar"
-    :model-value="modelValue"
-    @update:model-value="hanldeUpdate"
-    :weekday-format="'short'"
-    class="bg-white rounded-md border shadow-sm"
-  />
+  <div id="app-calendar">
+    <!-- v-model="modelValue" -->
+    <Calendar
+      :model-value="modelValue"
+      @update:model-value="handleUpdate"
+      :weekday-format="'short'"
+      class="bg-white rounded-md border shadow-sm"
+    />
+  </div>
 </template>

@@ -1,3 +1,4 @@
+import { logResponse } from '@/utils'
 import axios from 'axios'
 
 const request = axios.create({
@@ -20,8 +21,7 @@ request.interceptors.request.use(
 )
 request.interceptors.response.use(
   (response) => {
-    console.log(JSON.stringify(response, null, 2))
-    console.log(response.data)
+    logResponse(response, false)
     if (response.data.code === 200) {
       return response.data.data
     }

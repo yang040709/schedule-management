@@ -2,81 +2,28 @@
 import { Button } from '../ui/button'
 import { Textarea } from '../ui/textarea'
 import { ref } from 'vue'
-import type { ScheduleForm } from '@/types/schedule'
 import { getTodayDate } from '@/utils/date'
-import { getId } from '@/utils'
 import { toast } from 'vue-sonner'
+import { generateScheduleApi } from '@/api/schedule'
+import { useFetchData } from '@/hooks/useFetchData'
+import { priorityMap } from '@/constant'
 
 // 定义解析状态类型
 type ParseStatus = 'unparsed' | 'parsing' | 'success' | 'error'
 
-const userInput = ref('')
+const userInput = ref({
+  content: '',
+})
 const parseStatus = ref<ParseStatus>('unparsed') // 默认未解析状态
 
-const parseResult = ref({
+const { data, fetchData, loading } = useFetchData(generateScheduleApi, [userInput], {
   title: '',
   description: '',
   priority: 'high',
-  completed: false,
   date: getTodayDate(),
 })
+
 const errorMessage = ref('')
-
-// 模拟解析任务的函数
-const parseTask = (input: string) => {
-  return new Promise((resolve, reject) => {
-    // 模拟网络请求延迟
-    setTimeout(() => {
-      // 简单的解析逻辑，实际项目中会替换为真实的解析服务
-      const trimmedInput = input.trim()
-
-      // 模拟解析失败场景（空输入或无效格式）
-      if (!trimmedInput) {
-        reject(new Error('请输入任务内容后再进行解析'))
-        return
-      }
-
-      if (!trimmedInput.includes('和') || !trimmedInput.includes('点')) {
-        reject(new Error('无法识别任务格式，请尝试输入类似"下周一上午10点和小王开会"的内容'))
-        return
-      }
-
-      // 模拟解析成功的结果
-      resolve({
-        title: trimmedInput.includes('开会') ? '和小王开会' : '与相关人员会面',
-        // : trimmedInput.match(/下周一.*?\d+点/)?.[0] || '下周一 10:00',
-        description: '描述',
-        date: getTodayDate(),
-        priority: 'high',
-        category: ['会议'],
-        completed: false,
-      })
-    }, 800)
-  })
-}
-
-const handleSubmit = async () => {
-  if (!userInput.value.trim()) {
-    parseStatus.value = 'error'
-    errorMessage.value = '请输入任务内容'
-    return
-  }
-
-  // 开始解析，显示加载状态
-  parseStatus.value = 'parsing'
-
-  try {
-    // 调用解析函数
-    const result = await parseTask(userInput.value)
-    // @ts-ignore
-    parseResult.value = result
-    parseStatus.value = 'success'
-  } catch (err) {
-    // 解析失败处理
-    parseStatus.value = 'error'
-    errorMessage.value = err instanceof Error ? err.message : '解析任务时发生错误'
-  }
-}
 
 // 重置解析状态
 const resetParse = () => {
@@ -91,6 +38,22 @@ const confirmAdd = () => {
 const cancelAdd = () => {
   resetParse()
 }
+
+const handleSubmit = async () => {
+  if (!userInput.value.content.trim()) {
+    parseStatus.value = 'error'
+    errorMessage.value = '请输入任务内容'
+    return
+  }
+  parseStatus.value = 'parsing'
+  try {
+    await fetchData()
+    parseStatus.value = 'success'
+  } catch (error) {
+    parseStatus.value = 'error'
+    errorMessage.value = error instanceof Error ? error.message : '解析任务时发生错误'
+  }
+}
 </script>
 
 <template>
@@ -99,27 +62,27 @@ const cancelAdd = () => {
     <div class="space-y-4">
       <div class="flex flex-col space-y-4">
         <Textarea
-          v-model="userInput"
+          v-model="userInput.content"
           type="text"
           placeholder="输入任务，如：下周一上午10点和小王开会。我们将使用大模型帮你添加任务。"
           class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-          :class="{ 'border-error': parseStatus === 'error' && userInput.trim() }"
+          :class="{ 'border-error': parseStatus === 'error' && userInput.content.trim() }"
           @input="resetParse"
         />
         <Button
           @click="handleSubmit"
-          class="bg-primary hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+          class="bg-primary text-white px-6 py-3 rounded-lg font-medium transition-colors"
           :disabled="parseStatus === 'parsing'"
         >
           <i class="fas fa-magic mr-2"></i>
           <span v-if="parseStatus !== 'parsing'">智能解析</span>
-          <span v-else> <i class="fas fa-spinner fa-spin mr-2"></i>解析中... </span>
+          <span v-else>解析中... </span>
         </Button>
       </div>
 
       <!-- 未解析状态 -->
       <div
-        v-if="parseStatus === 'unparsed' && userInput.trim()"
+        v-if="parseStatus === 'unparsed' && userInput.content.trim()"
         class="bg-gray-50 border border-gray-200 rounded-lg p-4"
       >
         <h3 class="text-gray-800 font-semibold mb-2 flex items-center">
@@ -139,32 +102,25 @@ const cancelAdd = () => {
         <div class="grid grid-cols-1 gap-4 text-sm">
           <div>
             <span class="text-gray-600">任务名称：</span>
-            <span class="font-medium">{{ parseResult.title }}</span>
+            <span class="font-medium">{{ data.title }}</span>
           </div>
           <div>
             <span class="text-gray-600">描述：</span>
-            <span class="font-medium">{{ parseResult.description }}</span>
+            <span class="font-medium">{{ data.description }}</span>
           </div>
           <div>
             <span class="text-gray-600">时间：</span>
-            <span class="font-medium">{{ parseResult.date }}</span>
+            <span class="font-medium">{{ data.date }}</span>
           </div>
           <div>
             <span class="text-gray-600">优先级：</span>
-            <span class="font-medium text-warning">{{ parseResult.priority }}</span>
+            <span class="font-medium text-warning">{{ priorityMap[data.priority] }}</span>
           </div>
-          <!-- <div v-if="parseResult.category?.length">
+          <div v-if="data.category?.length">
             <span class="text-gray-600">类别：</span>
-            <span class="font-medium">{{ parseResult.category }}</span>
+
+            <span class="font-medium mr-2" v-for="category in data.category">{{ category }}</span>
           </div>
-          <div v-if="parseResult.startTime">
-            <span class="text-gray-600">开始时间：</span>
-            <span class="font-medium">{{ parseResult.startTime }}</span>
-          </div>
-          <div v-if="parseResult.endTime">
-            <span class="text-gray-600">结束时间：</span>
-            <span class="font-medium">{{ parseResult.endTime }}</span>
-          </div> -->
         </div>
         <div class="button flex gap-x-4 mt-5 justify-between">
           <Button class="flex-1" @click="confirmAdd">确实添加</Button>
@@ -174,14 +130,12 @@ const cancelAdd = () => {
 
       <!-- 解析失败状态 -->
       <div v-if="parseStatus === 'error'" class="bg-red-50 border border-red-200 rounded-lg p-4">
-        <h3 class="text-red-800 font-semibold mb-2 flex items-center">
-          <i class="fas fa-exclamation-circle mr-2"></i>解析失败
-        </h3>
+        <h3 class="text-red-800 font-semibold mb-2 flex items-center">解析失败</h3>
         <p class="text-sm text-red-700 mb-3">
           {{ errorMessage }}
         </p>
         <Button @click="handleSubmit" variant="secondary" class="text-sm px-4 py-1 h-auto">
-          <i class="fas fa-sync-alt mr-1"></i>重试解析
+          重试解析
         </Button>
       </div>
     </div>
