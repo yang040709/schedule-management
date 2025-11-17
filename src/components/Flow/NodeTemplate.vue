@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import type { ScheduleEvent, PriorityLevel } from '@/types/schedule'
+import { ref, computed, watch } from 'vue'
+import type { FlowScheduleForm, PriorityLevel, Schedule, ScheduleStatus } from '@/types/schedule'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -16,65 +16,24 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { z } from 'zod'
 import { toast } from 'vue-sonner'
 import { cloneDeep } from 'lodash-es'
+import { getTodayDate, getTodayDateTime } from '@/utils/date'
+import { priorityMap } from '@/constant'
+import DeleteDialog from '../Schedule/DeleteDialog.vue'
 
-// Props
 interface Props {
-  schedule?: ScheduleEvent
+  schedule: Schedule
   onlyView?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  schedule: () => ({
-    id: '',
-    title: '',
-    description: '',
-    startTime: '',
-    endTime: '',
-    priority: 'medium' as PriorityLevel,
-    category: [],
-    completed: false,
-    date: '',
-  }),
-  onlyView: false,
-})
+const { onlyView = false, schedule } = defineProps<Props>()
 
-// console.log("props=>", props);
-
-// Emits
 const emit = defineEmits<{
-  update: [schedule: ScheduleEvent]
+  update: [schedule: Schedule]
   delete: [id: string]
 }>()
 
-// 编辑模式状态
-const isEditing = ref(false)
-
-// 表单数据
-const formData = ref<ScheduleEvent>({
-  id: props.schedule.id || '',
-  title: props.schedule.title || '',
-  description: props.schedule.description || '',
-  startTime: props.schedule.startTime || '',
-  endTime: props.schedule.endTime || '',
-  priority: props.schedule.priority || '',
-  category: props.schedule.category || [],
-  completed: props.schedule.completed || false,
-  date: props.schedule.date || '',
-})
-
-// 分类输入
-const categoryInput = ref('')
-
-// 计算属性
-const timeDisplay = computed(() => {
-  if (formData.value.startTime && formData.value.endTime) {
-    return `${formData.value.startTime}-${formData.value.endTime}`
-  }
-  return formData.value.startTime || formData.value.endTime || ''
-})
-
 const priorityColor = computed(() => {
-  switch (formData.value.priority) {
+  switch (schedule.priority) {
     case 'high':
       return 'border-red-400 bg-white'
     case 'medium':
@@ -86,247 +45,264 @@ const priorityColor = computed(() => {
   }
 })
 
-const scheduleSchema = z.object({
-  title: z
-    .string('标题不能为空且必须为字符串')
-    .min(2, '标题不能少于2个字')
-    .max(50, '标题不能超过50个字'),
-  description: z.string('描述不能为空且必须为字符串').min(1, '描述不能少于1个字'),
-  date: z.string().refine((v) => v, '请选择日期'),
-  category: z.refine(() => true),
-  priority: z.enum(['low', 'medium', 'high'], '请选择优先级'),
-  completed: z.refine(() => true),
-  startTime: z.refine(() => true),
-  endTime: z.refine(() => true),
+const priorityTagColor = computed(() => {
+  switch (schedule.priority) {
+    case 'high':
+      return 'bg-red-100 text-red-700'
+    case 'medium':
+      return 'bg-yellow-100 text-yellow-700'
+    case 'low':
+      return 'bg-green-100 text-green-700'
+    default:
+      return 'bg-gray-100 text-gray-700'
+  }
 })
-
-// 方法
-const toggleEdit = () => {
-  if (isEditing.value) {
-    // 退出编辑模式时保存数据
-    // emit('update', formData.value)
-    // console.log("正在编辑中");
-    // console.log(result);
-    const result = scheduleSchema.safeParse(formData.value)
-    if (!result.success) {
-      if (result.error.issues.length > 0 && result.error.issues[0]) {
-        toast.error(result.error.issues[0].message)
-      } else {
-        toast.error('表单类型错误，请检查表单')
-      }
-      return
-    }
-    // console.log(props.schedule.id, formData.value)
-    const newFormData = cloneDeep(formData.value)
-    emit('update', newFormData)
-  }
-  isEditing.value = !isEditing.value
-}
-
-const addCategory = () => {
-  if (
-    categoryInput.value.trim() &&
-    !formData.value.category?.includes(categoryInput.value.trim())
-  ) {
-    formData.value.category = [...(formData.value.category || []), categoryInput.value.trim()]
-    categoryInput.value = ''
+type StatusMap = {
+  [K in ScheduleStatus]: {
+    class: string
+    text: string
+    color: string
   }
 }
 
-const removeCategory = (index: number) => {
-  if (formData.value.category) {
-    formData.value.category.splice(index, 1)
-  }
+const statusMap = {
+  done: {
+    class: 'px-3 py-1 text-xs font-bold text-green-600 bg-green-50',
+    text: '已完成',
+    color: 'green-50',
+  },
+  pending: {
+    class: 'px-3 py-1 text-xs font-bold text-yellow-600 bg-yellow-100',
+    text: '待处理',
+    color: 'yellow-100',
+  },
+  expired: {
+    class: 'px-3 py-1 text-xs font-bold text-red-600 bg-red-50',
+    text: '已过期',
+    color: 'red-50',
+  },
+  canceled: {
+    class: 'px-3 py-1 text-xs font-bold text-red-600 bg-red-100',
+    text: '已取消',
+    color: 'red-100',
+  },
+}
+
+const handleEdit = () => {
+  emit('update', schedule)
 }
 
 const handleDelete = () => {
-  emit('delete', props.schedule.id)
+  console.log('delete')
+  // emit('delete', schedule.id)
 }
 
-const df = new DateFormatter('en-US', {
-  dateStyle: 'long',
-})
+// /*
+// 监听props变化，就会更新
+// */
+// watch(
+//   () => props.schedule,
+//   (newVal) => {
+//     formData.value = newVal
+//   },
+// )
 
-const neededDate = computed({
-  get: () => {
-    return parseDate(formData.value.date)
-  },
-  set: (date) => {
-    formData.value.date = date.toString()
-  },
-})
+// // 编辑模式状态
+// const isEditing = ref(false)
 
-const pickDateText = computed(() => {
-  return formData.value.date ? formData.value.date : 'Pick a date'
-})
+// // 表单数据
+// const formData = ref<Schedule>({
+//   id: props.schedule.id || '',
+//   title: props?.schedule.title || '',
+//   description: props.schedule.description || '',
+//   category: props.schedule.category || [],
+//   priority: props.schedule.priority || 'high',
+//   date: props.schedule.date || getTodayDate(),
+//   status: props.schedule.status || 'pending',
+//   createdAt: props.schedule.createdAt || getTodayDateTime(),
+//   updatedAt: props.schedule.updatedAt || getTodayDateTime(),
+// })
+
+// // 分类输入
+// const categoryInput = ref('')
+
+// // // 计算属性
+// // const timeDisplay = computed(() => {
+// //   if (formData.value.startTime && formData.value.endTime) {
+// //     return `${formData.value.startTime}-${formData.value.endTime}`
+// //   }
+// //   return formData.value.startTime || formData.value.endTime || ''
+// // })
+
+// const priorityColor = computed(() => {
+//   switch (formData.value.priority) {
+//     case 'high':
+//       return 'border-red-400 bg-white'
+//     case 'medium':
+//       return 'border-yellow-300 bg-white'
+//     case 'low':
+//       return 'border-green-400 bg-white'
+//     default:
+//       return 'border-gray-300 bg-white'
+//   }
+// })
+
+// const scheduleSchema = z.object({
+//   title: z
+//     .string('标题不能为空且必须为字符串')
+//     .min(2, '标题不能少于2个字')
+//     .max(50, '标题不能超过50个字'),
+//   description: z.string('描述不能为空且必须为字符串').min(1, '描述不能少于1个字'),
+//   date: z.string().refine((v) => v, '请选择日期'),
+//   category: z.refine(() => true),
+//   priority: z.enum(['low', 'medium', 'high'], '请选择优先级'),
+//   completed: z.refine(() => true),
+//   startTime: z.refine(() => true),
+//   endTime: z.refine(() => true),
+// })
+
+// // 方法
+// const toggleEdit = () => {
+//   if (isEditing.value) {
+//     // 退出编辑模式时保存数据
+//     // emit('update', formData.value)
+//     // console.log("正在编辑中");
+//     // console.log(result);
+//     const result = scheduleSchema.safeParse(formData.value)
+//     if (!result.success) {
+//       if (result.error.issues.length > 0 && result.error.issues[0]) {
+//         toast.error(result.error.issues[0].message)
+//       } else {
+//         toast.error('表单类型错误，请检查表单')
+//       }
+//       return
+//     }
+//     // console.log(props.schedule.id, formData.value)
+//     const newFormData = cloneDeep(formData.value)
+//     emit('update', newFormData)
+//   }
+//   isEditing.value = !isEditing.value
+// }
+
+// const addCategory = () => {
+//   if (
+//     categoryInput.value.trim() &&
+//     !formData.value.category?.includes(categoryInput.value.trim())
+//   ) {
+//     formData.value.category = [...(formData.value.category || []), categoryInput.value.trim()]
+//     categoryInput.value = ''
+//   }
+// }
+
+// const removeCategory = (index: number) => {
+//   if (formData.value.category) {
+//     formData.value.category.splice(index, 1)
+//   }
+// }
+
+// const handleDelete = () => {
+//   emit('delete', props.schedule.id)
+// }
+
+// const df = new DateFormatter('en-US', {
+//   dateStyle: 'long',
+// })
+
+// const neededDate = computed({
+//   get: () => {
+//     return parseDate(formData.value.date)
+//   },
+//   set: (date) => {
+//     formData.value.date = date.toString()
+//   },
+// })
+
+// const pickDateText = computed(() => {
+//   return formData.value.date ? formData.value.date : 'Pick a date'
+// })
+
+// const setStartTime = (event: Event) => {
+//   console.log(event, '<==start time')
+//   const target = event.target as HTMLInputElement
+//   formData.value.timeOfDay = {
+//     startTime: target.value,
+//     endTime: formData.value.timeOfDay?.endTime,
+//   }
+// }
+// const setEndTime = (event: Event) => {
+//   const target = event.target as HTMLInputElement
+//   formData.value.timeOfDay = {
+//     startTime: formData.value.timeOfDay?.startTime,
+//     endTime: target.value,
+//   }
+// }
 </script>
 
 <template>
   <div
     class="w-full relative p-4 rounded-2xl text-md border-2 transition-all duration-200 hover:shadow-md"
-    :class="[priorityColor, formData.completed ? 'opacity-80' : '']"
+    :class="[priorityColor]"
   >
     <!-- 显示模式 -->
-    <div v-if="!isEditing || onlyView" class="space-y-2">
+    <div class="space-y-2">
       <!-- 标题和完成状态 -->
       <div class="flex items-center gap-2">
-        <h3
-          class="font-medium text-gray-900 flex-1"
-          :class="{ 'line-through': formData.completed }"
-        >
-          {{ formData.title || '无标题' }}
+        <h3 class="font-medium text-gray-900 flex-1">
+          {{ schedule.title || '无标题' }}
         </h3>
       </div>
 
       <!-- 描述 -->
-      <p v-if="formData.description" class="text-sm text-gray-600">
-        {{ formData.description }}
+      <p v-if="schedule.description" class="text-sm text-gray-600">
+        {{ schedule.description }}
       </p>
 
       <!-- 时间 -->
-      <div v-if="timeDisplay" class="text-sm text-gray-500">
-        {{ timeDisplay }}
+      <div v-if="schedule.date" class="text-sm text-gray-500">日期： {{ schedule.date }}</div>
+
+      <div class="text-sm text-gray-500" v-if="schedule.timeOfDay">
+        时间：
+        {{ schedule.timeOfDay.startTime }}-{{ schedule.timeOfDay.endTime }}
       </div>
 
+      <div class="text-sm text-gray-500" v-if="schedule.id">
+        日程ID：
+        {{ schedule.id }}
+      </div>
+
+      <!-- 依赖 -->
+      <div v-if="schedule.dependentId" class="text-sm text-gray-500">
+        前置日程： {{ schedule.dependentId }}
+      </div>
       <!-- 分类标签 -->
-      <div v-if="formData.category && formData.category.length > 0" class="flex flex-wrap gap-1">
+      <div v-if="schedule.category && schedule.category.length > 0" class="flex flex-wrap gap-1">
         <span
-          v-for="(cat, index) in formData.category"
+          v-for="(cat, index) in schedule.category"
           :key="index"
           class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full"
         >
           {{ cat }}
         </span>
-      </div>
-
-      <!-- 优先级标识 -->
-      <div class="flex items-center gap-1 text-xs">
-        <span class="text-gray-500">优先级:</span>
+        <span class="px-2 py-1 rounded-full text-xs font-medium" :class="priorityTagColor">
+          {{ priorityMap[schedule.priority] }}
+        </span>
         <span
           class="px-2 py-1 rounded-full text-xs font-medium"
-          :class="{
-            'bg-red-100 text-red-700': formData.priority === 'high',
-            'bg-yellow-100 text-yellow-700': formData.priority === 'medium',
-            'bg-green-100 text-green-700': formData.priority === 'low',
-          }"
+          :class="statusMap[schedule.status].class"
         >
-          {{ formData.priority === 'high' ? '高' : formData.priority === 'medium' ? '中' : '低' }}
+          {{ statusMap[schedule.status].text }}
         </span>
       </div>
-      <div v-if="!onlyView" class="mt-6 flex justify-between gap-5">
-        <Button variant="outline" @click="toggleEdit">编辑</Button>
-        <Button variant="destructive" @click="handleDelete">删除</Button>
-      </div>
-    </div>
 
-    <!-- 编辑模式 -->
-    <div v-else class="space-y-4">
-      <!-- 标题 -->
-      <div class="space-y-2">
-        <Label for="title">标题</Label>
-        <Input id="title" v-model="formData.title" placeholder="输入标题" class="w-full nodrag" />
-      </div>
+      <p v-if="schedule.AIsuggestion" class="text-sm text-gray-600 bg-gray-100 p-2 rounded-md">
+        <span>行动建议:</span> {{ schedule.AIsuggestion }}
+      </p>
 
-      <!-- 描述 -->
-      <div class="space-y-2">
-        <Label for="description">描述</Label>
-        <Textarea
-          id="description"
-          v-model="formData.description"
-          placeholder="输入描述"
-          class="w-full nodrag"
-          rows="3"
-        />
-      </div>
-      <div class="space-y-2 no-drag">
-        <Label for="description">日期</Label>
-        <Popover>
-          <PopoverTrigger as-child>
-            <Button
-              variant="outline"
-              :class="
-                cn(
-                  'w-[280px] justify-start text-left font-normal',
-                  !formData.date && 'text-muted-foreground',
-                )
-              "
-            >
-              <CalendarIcon class="mr-2 h-4 w-4" />
-              {{ pickDateText }}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent class="w-auto p-0">
-            <Calendar v-model="neededDate" initial-focus />
-          </PopoverContent>
-        </Popover>
-      </div>
-      <!-- 时间 -->
-      <div class="grid grid-cols-2 gap-2">
-        <div class="space-y-2">
-          <Label for="startTime">开始时间</Label>
-          <Input id="startTime" v-model="formData.startTime" type="time" class="w-full" />
-        </div>
-        <div class="space-y-2">
-          <Label for="endTime">结束时间</Label>
-          <Input id="endTime" v-model="formData.endTime" type="time" class="w-full" />
-        </div>
-      </div>
-
-      <!-- 优先级 -->
-      <div class="space-y-2">
-        <Label>优先级</Label>
-        <RadioGroup v-model="formData.priority" class="flex gap-4">
-          <div class="flex items-center space-x-2">
-            <RadioGroupItem value="high" id="high" />
-            <Label for="high" class="text-red-600">高</Label>
-          </div>
-          <div class="flex items-center space-x-2">
-            <RadioGroupItem value="medium" id="medium" />
-            <Label for="medium" class="text-yellow-600">中</Label>
-          </div>
-          <div class="flex items-center space-x-2">
-            <RadioGroupItem value="low" id="low" />
-            <Label for="low" class="text-green-600">低</Label>
-          </div>
-        </RadioGroup>
-      </div>
-
-      <!-- 分类 -->
-      <div class="space-y-2">
-        <Label>分类标签</Label>
-        <div class="flex gap-2">
-          <Input
-            v-model="categoryInput"
-            placeholder="输入分类"
-            class="flex-1 nodrag"
-            @keyup.enter="addCategory"
-          />
-          <Button @click="addCategory" size="sm">添加</Button>
-        </div>
-        <div v-if="formData.category && formData.category.length > 0" class="flex flex-wrap gap-1">
-          <span
-            v-for="(cat, index) in formData.category"
-            :key="index"
-            class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full flex items-center gap-1"
-          >
-            {{ cat }}
-            <button @click="removeCategory(index)" class="text-gray-400 hover:text-red-500">
-              <X class="w-4" />
-            </button>
-          </span>
-        </div>
-      </div>
-
-      <!-- 完成状态 -->
-      <div class="flex items-center space-x-2">
-        <input id="completed" v-model="formData.completed" type="checkbox" class="rounded" />
-        <Label for="completed">已完成</Label>
-      </div>
-
-      <!-- 操作按钮 -->
-      <div class="flex gap-2 pt-2">
-        <Button @click="toggleEdit" class="flex-1 nodrag">保存</Button>
-        <Button @click="isEditing = false" variant="outline" class="flex-1 nodrag">取消</Button>
+      <div v-if="!onlyView" class="mt-3 flex justify-between gap-5">
+        <Button variant="outline" @click="handleEdit">编辑</Button>
+        <DeleteDialog @confirm="handleDelete">
+          <Button variant="destructive">删除</Button>
+        </DeleteDialog>
       </div>
     </div>
   </div>

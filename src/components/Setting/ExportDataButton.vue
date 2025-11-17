@@ -1,14 +1,21 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
-import { useScheduleStore } from '@/stores/schedule'
-import { computed } from 'vue'
 import { toast } from 'vue-sonner'
 import { exportJson } from '@/utils/file'
-const scheduleStore = useScheduleStore()
+import { useFetchData } from '@/hooks/useFetchData'
+import { exportDataApi } from '@/api/setting'
+import { getTodayDate } from '@/utils/date'
 
-const exportData = () => {
-  const scheduleData = computed(() => scheduleStore.scheduleData)
-  exportJson(scheduleData.value, 'scheduleData.json')
+const { fetchData, data } = useFetchData(exportDataApi, [], {
+  total: 0,
+  data: [],
+})
+
+const fileName = `scheduleData-v${getTodayDate()}.json`
+
+const exportData = async () => {
+  await fetchData()
+  exportJson(data.value, fileName)
   toast.success('数据已导出')
 }
 </script>

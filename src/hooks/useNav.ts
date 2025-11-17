@@ -10,6 +10,8 @@ import {
   ArrowDownUp,
   Settings,
 } from 'lucide-vue-next'
+
+import { UAParser } from 'ua-parser-js'
 interface MyRouteLocationAsRelativeGeneric extends RouteLocationAsRelativeGeneric {
   name: string
 }
@@ -20,36 +22,69 @@ interface NavList {
   icon: typeof Component
 }
 export const useNav = () => {
-  const navList: NavList[] = [
-    {
-      text: '日程',
-      route: {
-        name: 'todayCalendar',
+  const parser = new UAParser()
+  // console.log(parser.getDevice().type)
+  const device = parser.getDevice().type
+
+  let navList: NavList[] = []
+  if (device === 'mobile' || device === 'tablet') {
+    navList = [
+      {
+        text: '日程',
+        route: {
+          name: 'todayCalendar',
+        },
+        icon: ListTodo,
       },
-      icon: ListTodo,
-    },
-    {
-      text: '流程',
-      route: {
-        name: 'flow',
+      {
+        text: '列表',
+        route: {
+          name: 'schedule-list',
+        },
+        icon: List,
       },
-      icon: ArrowDownUp,
-    },
-    {
-      text: '列表',
-      route: {
-        name: 'schedule-list',
+      {
+        text: '设置',
+        route: {
+          name: 'setting',
+        },
+        icon: Settings,
       },
-      icon: List,
-    },
-    {
-      text: '设置',
-      route: {
-        name: 'setting',
+    ]
+  } else {
+    navList = [
+      {
+        text: '日程',
+        route: {
+          name: 'todayCalendar',
+        },
+        icon: ListTodo,
       },
-      icon: Settings,
-    },
-  ]
+      {
+        text: '流程',
+        route: {
+          name: 'flow',
+        },
+        icon: ArrowDownUp,
+      },
+      {
+        text: '列表',
+        route: {
+          name: 'schedule-list',
+        },
+        icon: List,
+      },
+      {
+        text: '设置',
+        route: {
+          name: 'setting',
+        },
+        icon: Settings,
+      },
+    ]
+  }
+
+  // const
 
   const route = useRoute()
   const isActive = (name: string) => {

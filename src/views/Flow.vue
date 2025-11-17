@@ -6,66 +6,93 @@ import { MiniMap } from '@vue-flow/minimap'
 import { Background } from '@vue-flow/background'
 import ScheduleNode from '@/components/Flow/ScheduleNode.vue'
 import FlowSideBar from '@/components/Flow/FlowSideBar.vue'
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, watch } from 'vue'
 import useDragAndDrop from '@/hooks/useDnD'
-import type { Schedule, ScheduleForm } from '@/types/schedule'
+import type { FlowScheduleForm, Schedule } from '@/types/schedule'
 import { getTemplateId } from '@/utils'
 import { toast } from 'vue-sonner'
 import { getTodayDate } from '@/utils/date'
 import { useScheduleStore } from '@/stores/schedule'
 import { useRouter } from 'vue-router'
 import { APP_CONFIG } from '@/config/app'
+import { useDragStore } from '@/stores/drag'
+import { useEditModelStore } from '@/stores/editModel'
+import { useFetchData } from '@/hooks/useFetchData'
+import { modifyScheduleApi } from '@/api/schedule'
+import { getScheduleInitialData } from '@/constant'
 
 // const scheduleStore = useScheduleStore()
 const router = useRouter()
 
-const node1Id = getTemplateId()
-const node2Id = getTemplateId()
-const getDefaultNodes: () => Node<ScheduleForm>[] = () => {
-  return [
-    {
-      id: node1Id,
-      type: 'schedule',
-      position: { x: 0, y: 0 },
-      data: {
-        title: '周计划制定',
-        description: '制定周计划，包括工作和规划',
-        priority: 'medium',
-        category: ['工作', '规划'],
-        date: getTodayDate(),
-        // completed: false,
-        // state:"",
-      },
-    },
-    {
-      id: node2Id,
-      type: 'schedule',
-      position: { x: 350, y: 280 },
-      data: {
-        title: '拖拽右侧的节点到面板中',
-        description: '这样就可以添加您的日程',
-        priority: 'low',
-        category: ['工作', '规划'],
-        date: getTodayDate(),
-      },
-    },
-  ]
-}
-const getDefauleEdges: () => Edge[] = () => {
-  return [{ id: getTemplateId(), source: node1Id, target: node2Id, markerEnd: 'arrowclosed' }]
-}
+const editModelStore = useEditModelStore()
 
-const nodes = ref<Node<ScheduleForm>[]>(getDefaultNodes())
-const edges = ref<Edge[]>(getDefauleEdges())
+watch(
+  () => editModelStore.editResponse,
+  (newVal) => {
+    console.log(newVal, '<===watch editResponse')
+    if (!newVal) {
+      return
+    }
+    const node = nodes.value.find((item) => {
+      if (item && item.data) {
+        return item.data.id === newVal.id
+      }
+    })
+    if (node) {
+      console.log(node)
+      node.data = newVal
+    }
+  },
+)
 
-const { onConnect, addEdges, fitView, nodes: vueFlowNodes } = useVueFlow()
+const nodes = ref<Node<Schedule>[]>([])
+const edges = ref<Edge[]>([])
 
+/* 
+首次调用useVueFlow非常重要，
+useVueFlow 组合式会在第一次调用时创建一个新的 VueFlowStore 实例，并将其注入到 Vue 组件树中。这允许你使用 useVueFlow 组合式从任何子组件中访问存储。
+这也意味着 useVueFlow 的第一次调用至关重要，因为它决定了整个组件树中将要使用的状态实例。你可以将其视为一种自动注入到组件树中的 <VueFlowProvider> 包装器。
+*/
+const { onConnect, addEdges, fitView } = useVueFlow('yang-flow')
+
+const dragStore = useDragStore()
+
+const { onDrop, onDragOver, onDragLeave, isDragOver } = dragStore
+
+/* 
+监听连接事件
+*/
 onConnect((params) => {
   console.log('connect', params)
+  const sourceNode = nodes.value.find((item) => item.id === params.source)
+  const targetNode = nodes.value.find((item) => item.id === params.target)
+  if (params.source === params.target) {
+    return
+  }
+  if (!sourceNode || !targetNode || !sourceNode.data || !targetNode.data) {
+    console.error('连接失败，源节点或目标节点不存在')
+    return
+  }
+  targetNode.data.dependentId = sourceNode.data.id
   addEdges([{ ...params, id: getTemplateId(), markerEnd: 'arrowclosed' }])
+  useFetchData(
+    modifyScheduleApi,
+    [
+      targetNode.id,
+      {
+        dependentId: sourceNode.data.id,
+      },
+    ],
+    {
+      schedule: getScheduleInitialData(),
+    },
+    {
+      init: 'immediate',
+    },
+  )
 })
 
-const { onDrop, onDragOver, onDragLeave, isDragOver } = useDragAndDrop()
+// const { onDrop, onDragOver, onDragLeave, isDragOver } = useDragAndDrop()
 
 const isSave = ref(false)
 const handleSave = () => {
@@ -80,14 +107,14 @@ const handleSave = () => {
     // scheduleStore.setScheduleData(node.data)
   })
   toast.success('保存成功，1秒后跳转到日历页')
-  setTimeout(() => {
-    router.push('/')
-    isSave.value = false
-  }, 1000)
+  // setTimeout(() => {
+  //   router.push('/')
+  //   isSave.value = false
+  // }, 1000)
 }
 const handleReset = async () => {
-  nodes.value = getDefaultNodes()
-  edges.value = getDefauleEdges()
+  nodes.value = []
+  edges.value = []
   await nextTick()
   fitView()
   toast.success('重置成功')
@@ -101,9 +128,17 @@ const defaultViewport = {
 </script>
 
 <template>
-  <div class="flex w-full border-1" @drop="onDrop">
+  <div
+    class="flex w-full border-1"
+    @drop="onDrop"
+    id="yang-flow-container"
+    :style="{
+      'max-height': `calc(100vh - ${APP_CONFIG.HeaderHeight + 3}px)`,
+      height: `calc(100vh - ${APP_CONFIG.HeaderHeight + 3}px)`,
+    }"
+  >
     <!-- :style="{ height: `calc(100vh - ${APP_CONFIG.HeaderHeight})` }" -->
-    <FlowSideBar class="w-1/4" @save="handleSave" @reset="handleReset" />
+    <FlowSideBar @save="handleSave" @reset="handleReset" />
 
     <VueFlow
       v-model:nodes="nodes"
@@ -114,7 +149,6 @@ const defaultViewport = {
       :style="{
         backgroundColor: isDragOver ? '#e7f3ff' : 'transparent',
         transition: 'background-color 0.2s ease',
-        height: `calc(100vh - ${APP_CONFIG.HeaderHeight + 3}px)`,
       }"
       class="flex-1"
     >
@@ -127,12 +161,3 @@ const defaultViewport = {
     </VueFlow>
   </div>
 </template>
-
-<style scoped>
-.vue-flow {
-  /* flex: 1; */
-  /* height: calc; */
-}
-
-/* width: 600px; */
-</style>

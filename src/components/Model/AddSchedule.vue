@@ -36,7 +36,7 @@ import { getScheduleInitialData } from '@/constant'
 
 const tagStore = useTagStore()
 const modelStore = useAddModelStore()
-const { addModelOpen, addModelInfo } = storeToRefs(modelStore)
+const { addModelOpen, addModelInfo, addResponse } = storeToRefs(modelStore)
 
 const initResponse: ScheduleResponse = {
   schedule: getScheduleInitialData(),
@@ -50,6 +50,7 @@ const { data, loading, fetchData } = useFetchData(addScheduleApi, [params], init
 const submitFunc = async () => {
   // scheduleStore.setScheduleData(values)
   await fetchData()
+  addResponse.value = data.value.schedule
   toast.success('添加日程成功', {
     description: '1秒后跳转到日历页',
   })
@@ -235,7 +236,7 @@ const {
               <FormControl>
                 <Input
                   type="text"
-                  placeholder="请输入日程标题"
+                  placeholder="请输入依赖日程ID"
                   v-bind="componentField"
                   class="h-11 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
                 />

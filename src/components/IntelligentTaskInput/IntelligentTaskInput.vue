@@ -4,9 +4,11 @@ import { Textarea } from '../ui/textarea'
 import { ref } from 'vue'
 import { getTodayDate } from '@/utils/date'
 import { toast } from 'vue-sonner'
-import { generateScheduleApi } from '@/api/schedule'
+import { generateScheduleApi, addScheduleApi } from '@/api/schedule'
 import { useFetchData } from '@/hooks/useFetchData'
 import { priorityMap } from '@/constant'
+import { useAddModelStore } from '@/stores/addModel'
+import { getScheduleInitialData } from '@/constant'
 
 // 定义解析状态类型
 type ParseStatus = 'unparsed' | 'parsing' | 'success' | 'error'
@@ -15,6 +17,7 @@ const userInput = ref({
   content: '',
 })
 const parseStatus = ref<ParseStatus>('unparsed') // 默认未解析状态
+const addModelStore = useAddModelStore()
 
 const { data, fetchData, loading } = useFetchData(generateScheduleApi, [userInput], {
   title: '',
@@ -31,8 +34,19 @@ const resetParse = () => {
   errorMessage.value = ''
 }
 
-const confirmAdd = () => {
+const {
+  data: addResponseData,
+  fetchData: fetchAddData,
+  loading: addLoading,
+} = useFetchData(addScheduleApi, [data.value], {
+  schedule: getScheduleInitialData(),
+})
+
+const confirmAdd = async () => {
+  await fetchAddData()
+  addModelStore.addResponse = addResponseData.value.schedule
   toast.success('任务添加成功')
+  resetParse()
 }
 
 const cancelAdd = () => {
@@ -122,7 +136,7 @@ const handleSubmit = async () => {
             <span class="font-medium mr-2" v-for="category in data.category">{{ category }}</span>
           </div>
         </div>
-        <div class="button flex gap-x-4 mt-5 justify-between">
+        <div class="button flex gap-4 mt-5 justify-between flex-wrap">
           <Button class="flex-1" @click="confirmAdd">确实添加</Button>
           <Button class="flex-1" @click="cancelAdd" variant="outline">取消</Button>
         </div>

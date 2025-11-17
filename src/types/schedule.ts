@@ -101,6 +101,10 @@ export interface ScheduleListQuery {
   status?: ScheduleStatus
   priority?: string
   date?: string
+  dateRange?: {
+    startDate: string // "2025-11-01"
+    endDate: string // "2025-11-10"
+  }
   page?: number
   pageSize?: number
 }
@@ -124,6 +128,21 @@ export interface ScheduleForm {
   timeOfDay?: {
     startTime: string // "08:00" 或 "08:00:00"
     endTime: string // "09:00"
+  }
+  date: string
+}
+
+export interface FlowScheduleForm {
+  id: string
+  title: string
+  description: string
+  priority: 'high' | 'medium' | 'low'
+  category?: string[]
+  dependentId?: string // 依赖的任务ID
+  // 所有任务共用的时间段（可选）
+  timeOfDay: {
+    startTime?: string // "08:00" 或 "08:00:00"
+    endTime?: string // "09:00"
   }
   date: string
 }

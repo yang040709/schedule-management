@@ -141,7 +141,12 @@ const showDetail = () => {
         </h4>
       </div>
       <p v-if="item.description" class="mt-2 text-sm text-slate-500">{{ item.description }}</p>
-
+      <p v-if="item.dependentId" class="mt-2 text-sm text-slate-500">
+        依赖任务：{{ item.dependentId }}
+      </p>
+      <p v-if="item.timeOfDay" class="mt-1 text-sm text-slate-500">
+        时间：{{ item.timeOfDay?.startTime }} - {{ item.timeOfDay?.endTime }}
+      </p>
       <div class="mt-2 flex gap-x-3 flex-wrap gap-y-2">
         <span
           v-for="tag in item.category"
@@ -156,12 +161,12 @@ const showDetail = () => {
         >
           {{ priority.text }}
         </span>
-        <span class="px-3 py-1 text-xs font-bold bg-lime-100 text-lime-600" v-if="item.timeOfDay">
+        <!-- <span class="px-3 py-1 text-xs font-bold bg-lime-100 text-lime-600" v-if="item.timeOfDay">
           {{ item.timeOfDay?.startTime }} - {{ item.timeOfDay?.endTime }}
-        </span>
-        <span class="px-3 py-1 text-xs font-bold bg-cyan-100 text-cyan-600">
+        </span> -->
+        <!-- <span class="px-3 py-1 text-xs font-bold bg-cyan-100 text-cyan-600">
           {{ relativeSingleTime }}
-        </span>
+        </span> -->
 
         <span :class="statusMap[item.status].class">
           {{ statusMap[item.status].text }}

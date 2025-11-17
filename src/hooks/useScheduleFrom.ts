@@ -23,11 +23,11 @@ type ScheduleInitType = ScheduleForm | (() => ScheduleForm)
 export const useScheduleFrom = (initialParam: ScheduleForm, submitFunc: () => void) => {
   const formSchema = toTypedSchema(
     z.object({
-      title: z.string().min(1, '标题不能为空'),
-      description: z.string().optional(),
+      title: z.string('请输入标题').min(1, '标题不能为空'),
+      description: z.string('请输入描述').optional(),
       priority: z.enum(['high', 'medium', 'low']),
-      category: z.array(z.string()).optional(),
-      dependentId: z.string().optional(),
+      category: z.array(z.string('请输入分类')).optional(),
+      dependentId: z.string('请输入依赖日程ID').optional(),
       timeOfDay: z
         .object({
           startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/, {

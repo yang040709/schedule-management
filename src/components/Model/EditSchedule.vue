@@ -42,7 +42,7 @@ const tagStore = useTagStore()
 const modelStore = useEditModelStore()
 console.log(modelStore.editModelOpen, modelStore.editModelInfo, '<===modelStore')
 
-const { editModelOpen, editModelInfo } = storeToRefs(modelStore)
+const { editModelOpen, editModelInfo, editResponse } = storeToRefs(modelStore)
 
 const initResponse: ScheduleResponse = {
   schedule: getScheduleInitialData(),
@@ -60,11 +60,12 @@ const { data, loading, fetchData } = useFetchData(
 
 const submitFunc = async () => {
   // scheduleStore.setScheduleData(values)
+  // toast.success('添加日程成功', {
+  //   description: '1秒后跳转到日历页',
+  // })
   await fetchData()
-  toast.success('添加日程成功', {
-    description: '1秒后跳转到日历页',
-  })
   editModelOpen.value = false
+  editResponse.value = data.value.schedule
 }
 
 const initValue = {}
@@ -308,6 +309,20 @@ const generateAISuggestion = async () => {
               <FormMessage />
             </FormItem>
           </FormField>
+          <FormField v-slot="{ componentField }" name="dependentId">
+            <FormItem class="space-y-2">
+              <FormLabel class="text-base font-medium">依赖日程ID（可选）</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="请输入依赖日程ID"
+                  v-bind="componentField"
+                  class="h-11 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
+                />
+              </FormControl>
+              <FormMessage class="text-sm" />
+            </FormItem>
+          </FormField>
           <FormField v-slot="{ componentField }" name="category">
             <FormItem class="space-y-3">
               <FormLabel class="text-base font-medium">日程标签（可选）</FormLabel>
@@ -342,8 +357,8 @@ const generateAISuggestion = async () => {
               type="submit"
               class="w-full h-12 text-white font-medium rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
             >
-              <template v-if="!loading"> 添加 </template>
-              <template v-else> 添加中... </template>
+              <template v-if="!loading"> 修改 </template>
+              <template v-else> 修改中... </template>
             </Button>
           </div>
         </form>

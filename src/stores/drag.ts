@@ -1,27 +1,30 @@
+import { defineStore } from 'pinia'
 import { useVueFlow } from '@vue-flow/core'
 import { ref, watch } from 'vue'
-import { getTodayDate } from '@/utils/date'
-import { getTemplateId } from '@/utils'
 import type { Schedule } from '@/types/schedule'
 
-/**
- *在现实世界中，您希望避免在全局范围内创建引用，因为它们可能无法正确清理。
- * @type {{draggedType: Ref<string|null>, isDragOver: Ref<boolean>, isDragging: Ref<boolean>}}
- */
-const state = {
+export const useDragStore = defineStore('drag', () => {
   /**
-   * 被拖动的节点的类型。
+   *在现实世界中，您希望避免在全局范围内创建引用，因为它们可能无法正确清理。
+   * @type {{draggedType: Ref<string|null>, isDragOver: Ref<boolean>, isDragging: Ref<boolean>}}
    */
-  draggedType: ref(null),
-  isDragOver: ref(false),
-  isDragging: ref(false),
-}
+  const state = {
+    /**
+     * 被拖动的节点的类型。
+     */
+    draggedType: ref(null),
+    isDragOver: ref(false),
+    isDragging: ref(false),
+  }
 
-export default function useDragAndDrop(dropSuccessCallback?: (...args: any[]) => void) {
   const { draggedType, isDragOver, isDragging } = state
 
   const { addNodes, screenToFlowCoordinate, onNodesInitialized, updateNode } =
     useVueFlow('yang-flow')
+
+  // const schedule = ref<Schedule | null>(null)
+
+  const scheduleList = ref<Schedule[]>([])
 
   watch(isDragging, (dragging) => {
     document.body.style.userSelect = dragging ? 'none' : ''
@@ -30,7 +33,7 @@ export default function useDragAndDrop(dropSuccessCallback?: (...args: any[]) =>
   function onDragStart(event: any, type: any, data: Schedule) {
     if (event.dataTransfer) {
       event.dataTransfer.setData('application/vueflow', type)
-      event.dataTransfer.setData('application/json', JSON.stringify(data))
+      event.dataTransfer.setData('application/json', JSON.stringify({ id: data.id }))
       event.dataTransfer.effectAllowed = 'move'
     }
 
@@ -76,9 +79,6 @@ export default function useDragAndDrop(dropSuccessCallback?: (...args: any[]) =>
    */
   function onDrop(event: any) {
     console.log(event, '<===onDrop')
-    console.log(event.dataTransfer.getData('application/vueflow'), '<===onDrop')
-    console.log(event.dataTransfer.getData('application/json'), '<===onDrop')
-
     const position = screenToFlowCoordinate({
       x: event.clientX,
       y: event.clientY,
@@ -86,10 +86,16 @@ export default function useDragAndDrop(dropSuccessCallback?: (...args: any[]) =>
 
     // const nodeId = getTemplateId()
 
-    const nodeData = JSON.parse(event.dataTransfer.getData('application/json'))
+    const nodeId = JSON.parse(event.dataTransfer.getData('application/json')).id
+
+    const nodeData = scheduleList.value.find((item) => item.id === nodeId)
+    if (!nodeData) {
+      console.error('Node not found:', nodeId)
+      return
+    }
 
     const newNode = {
-      id: nodeData.id,
+      id: nodeId,
       type: draggedType.value || 'custom',
       position,
       data: nodeData,
@@ -110,15 +116,15 @@ export default function useDragAndDrop(dropSuccessCallback?: (...args: any[]) =>
 
       off()
     })
-
-    if (dropSuccessCallback) {
-      /* 拖拽成功调用回调 */
-      dropSuccessCallback()
-    }
+    /* 
+    把数组中id为nodeData.id的元素删除
+    */
+    scheduleList.value = scheduleList.value.filter((item) => item.id !== nodeData.id)
     addNodes(newNode)
   }
 
   return {
+    scheduleList,
     draggedType,
     isDragOver,
     isDragging,
@@ -127,4 +133,4 @@ export default function useDragAndDrop(dropSuccessCallback?: (...args: any[]) =>
     onDragOver,
     onDrop,
   }
-}
+})
