@@ -2,7 +2,6 @@
 import { Calendar } from '@/components/ui/calendar'
 import { useRoute } from 'vue-router'
 import { fromDate, getLocalTimeZone, parseDate } from '@internationalized/date'
-import type { DateValue } from '@internationalized/date'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 const route = useRoute()

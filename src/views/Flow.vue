@@ -1,18 +1,14 @@
 <script setup lang="ts">
 import { VueFlow, useVueFlow } from '@vue-flow/core'
 import type { Edge, Node } from '@vue-flow/core'
-import { Controls } from '@vue-flow/controls'
-import { MiniMap } from '@vue-flow/minimap'
 import { Background } from '@vue-flow/background'
 import ScheduleNode from '@/components/Flow/ScheduleNode.vue'
 import FlowSideBar from '@/components/Flow/FlowSideBar.vue'
 import { ref, nextTick, watch } from 'vue'
-import useDragAndDrop from '@/hooks/useDnD'
 import type { FlowScheduleForm, Schedule } from '@/types/schedule'
 import { getTemplateId } from '@/utils'
 import { toast } from 'vue-sonner'
 import { getTodayDate } from '@/utils/date'
-import { useScheduleStore } from '@/stores/schedule'
 import { useRouter } from 'vue-router'
 import { APP_CONFIG } from '@/config/app'
 import { useDragStore } from '@/stores/drag'
@@ -20,30 +16,18 @@ import { useEditModelStore } from '@/stores/editModel'
 import { useFetchData } from '@/hooks/useFetchData'
 import { modifyScheduleApi } from '@/api/schedule'
 import { getScheduleInitialData } from '@/constant'
+import eventBus from '@/utils/eventBus'
 
-// const scheduleStore = useScheduleStore()
-const router = useRouter()
-
-const editModelStore = useEditModelStore()
-
-watch(
-  () => editModelStore.editResponse,
-  (newVal) => {
-    console.log(newVal, '<===watch editResponse')
-    if (!newVal) {
-      return
+eventBus.on('edit-schedule', (schedule) => {
+  const node = nodes.value.find((item) => {
+    if (item && item.data) {
+      return item.data.id === schedule.id
     }
-    const node = nodes.value.find((item) => {
-      if (item && item.data) {
-        return item.data.id === newVal.id
-      }
-    })
-    if (node) {
-      console.log(node)
-      node.data = newVal
-    }
-  },
-)
+  })
+  if (node) {
+    node.data = schedule
+  }
+})
 
 const nodes = ref<Node<Schedule>[]>([])
 const edges = ref<Edge[]>([])

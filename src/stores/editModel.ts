@@ -7,10 +7,8 @@ import { getScheduleInitialData } from '@/constant'
 export const useEditModelStore = defineStore('editModel', () => {
   const editModelOpen = ref(false)
   const editModelInfo = ref<Schedule>(getScheduleInitialData())
-  const editResponse = ref<Schedule | null>(null)
   return {
     editModelOpen,
     editModelInfo,
-    editResponse,
   }
 })

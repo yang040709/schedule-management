@@ -5,7 +5,7 @@ import { List } from 'lucide-vue-next'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
 import DeleteDialog from './DeleteDialog.vue'
-import dayjs from 'dayjs'
+import dayjs from '@/utils/dayjs'
 import { getTodayDate } from '@/utils/date'
 import { useDetailModelStore } from '@/stores/detailModel'
 

@@ -9,6 +9,8 @@ import { useFetchData } from '@/hooks/useFetchData'
 import { priorityMap } from '@/constant'
 import { useAddModelStore } from '@/stores/addModel'
 import { getScheduleInitialData } from '@/constant'
+import eventBus from '@/utils/eventBus'
+import { cloneDeep } from 'lodash-es'
 
 // 定义解析状态类型
 type ParseStatus = 'unparsed' | 'parsing' | 'success' | 'error'
@@ -44,7 +46,7 @@ const {
 
 const confirmAdd = async () => {
   await fetchAddData()
-  addModelStore.addResponse = addResponseData.value.schedule
+  eventBus.emit('add-schedule', cloneDeep(addResponseData.value.schedule))
   toast.success('任务添加成功')
   resetParse()
 }

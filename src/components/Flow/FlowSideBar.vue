@@ -13,6 +13,7 @@ import { toast } from 'vue-sonner'
 import IntelligentTaskInput from '../IntelligentTaskInput/IntelligentTaskInput.vue'
 import { useDragStore } from '@/stores/drag'
 import { storeToRefs } from 'pinia'
+import eventBus from '@/utils/eventBus'
 const data = ref({
   label: '侧边栏',
 })
@@ -32,14 +33,19 @@ const emit = defineEmits<{
 
 const addModelStore = useAddModelStore()
 
-watch(
-  () => addModelStore.addResponse,
-  (newVal) => {
-    // console.log(newVal, 'change')
-    // schedule.value = cloneDeep(newVal)
-    scheduleList.value.push(newVal)
-  },
-)
+// watch(
+//   () => addModelStore.addResponse,
+//   (newVal) => {
+//     // console.log(newVal, 'change')
+//     // schedule.value = cloneDeep(newVal)
+//     scheduleList.value.push(newVal)
+//   },
+// )
+
+eventBus.on('add-schedule', (schedule) => {
+  // console.log('add-schedule',schedule)
+  scheduleList.value.push(schedule)
+})
 
 // const handleDragEnd = (event: DragEvent) => {
 //   console.log(event, '<===DragEnd event', event.target)

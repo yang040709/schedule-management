@@ -21,7 +21,6 @@ import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import TagItem from '@/components/Tag/TagItem.vue'
-import { useScheduleStore } from '@/stores/schedule'
 import type { ScheduleForm, ScheduleResponse } from '@/types/schedule'
 import { useRouter, useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -37,12 +36,14 @@ import { useEditModelStore } from '@/stores/editModel'
 import { useScheduleEditFrom } from '@/hooks/useScheduleEditFrom'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { getAISuggestByEditFormApi } from '@/api/schedule'
+import eventBus from '@/utils/eventBus'
+import { cloneDeep } from 'lodash-es'
 
 const tagStore = useTagStore()
 const modelStore = useEditModelStore()
 console.log(modelStore.editModelOpen, modelStore.editModelInfo, '<===modelStore')
 
-const { editModelOpen, editModelInfo, editResponse } = storeToRefs(modelStore)
+const { editModelOpen, editModelInfo } = storeToRefs(modelStore)
 
 const initResponse: ScheduleResponse = {
   schedule: getScheduleInitialData(),
@@ -59,13 +60,9 @@ const { data, loading, fetchData } = useFetchData(
 )
 
 const submitFunc = async () => {
-  // scheduleStore.setScheduleData(values)
-  // toast.success('添加日程成功', {
-  //   description: '1秒后跳转到日历页',
-  // })
   await fetchData()
+  eventBus.emit('edit-schedule', cloneDeep(data.value.schedule))
   editModelOpen.value = false
-  editResponse.value = data.value.schedule
 }
 
 const initValue = {}

@@ -1,4 +1,4 @@
-import dayjs from 'dayjs'
+import dayjs from '@/utils/dayjs'
 /**
  * 获得今天的日期，格式为 YYYY-MM-DD
  * @returns

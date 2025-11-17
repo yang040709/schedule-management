@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { storeToRefs } from 'pinia'
-import dayjs from 'dayjs'
+import dayjs from '@/utils/dayjs'
 import { getTodayDate } from '@/utils/date'
 import { computed } from 'vue'
 import type { ScheduleStatus } from '@/types/schedule'

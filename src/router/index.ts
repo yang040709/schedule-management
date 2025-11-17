@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAppStore } from '@/stores/app'
+import { getTodayDate } from '@/utils/date'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -10,7 +11,7 @@ const router = createRouter({
         return {
           name: 'calendar',
           params: {
-            date: new Date().toISOString().slice(0, 10),
+            date: getTodayDate(),
           },
         }
       },
@@ -18,11 +19,11 @@ const router = createRouter({
     {
       path: '/calendar',
       name: 'todayCalendar',
-      redirect(to) {
+      redirect() {
         return {
           name: 'calendar',
           params: {
-            date: new Date().toISOString().slice(0, 10),
+            date: getTodayDate(),
           },
         }
       },
@@ -32,6 +33,7 @@ const router = createRouter({
       name: 'flow',
       component: () => import('@/views/Flow.vue'),
       meta: {
+        title: '流程',
         layout: 'full',
       },
     },
@@ -48,6 +50,9 @@ const router = createRouter({
       path: '/schedule-list',
       name: 'schedule-list',
       component: () => import('@/views/ScheduleList.vue'),
+      meta: {
+        title: '日程列表',
+      },
     },
     {
       path: '/test',
@@ -58,6 +63,9 @@ const router = createRouter({
       path: '/setting',
       name: 'setting',
       component: () => import('@/views/Setting.vue'),
+      meta: {
+        title: '设置',
+      },
     },
     {
       path: '/about',
@@ -75,6 +83,7 @@ const router = createRouter({
       component: () => import('@/views/Login.vue'),
       meta: {
         layout: 'full',
+        title: '登录',
       },
     },
     {
@@ -83,6 +92,7 @@ const router = createRouter({
       component: () => import('@/views/Register.vue'),
       meta: {
         layout: 'full',
+        title: '注册',
       },
     },
     {

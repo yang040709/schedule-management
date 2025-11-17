@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import AppCalendar from '@/components/AppCalendar.vue'
 import ScheduleList from '@/components/Schedule/ScheduleList.vue'
-import { Button } from '@/components/ui/button'
 import IntelligentTaskInput from '@/components/IntelligentTaskInput/IntelligentTaskInput.vue'
-
-// const { date } = defineProps<{
-//   date: string
-// }>()
 </script>
 
 <template>

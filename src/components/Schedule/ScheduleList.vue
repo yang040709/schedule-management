@@ -1,18 +1,13 @@
 <script setup lang="ts">
 import ScheduleItem from './ScheduleItem.vue'
-// import { useDateStore } from '@/stores/date'
-import { useScheduleStore } from '@/stores/schedule'
-import { storeToRefs } from 'pinia'
 import { computed, watch } from 'vue'
-import TagList from '../Tag/TagList.vue'
 import { useRoute, useRouter } from 'vue-router'
-import CalendarDrawer from '../CalendarDrawer.vue'
 import { Button } from '../ui/button'
 import { toast } from 'vue-sonner'
 import type { PriorityLevel, ScheduleStatus } from '@/types/schedule'
 import { useAddModelStore } from '@/stores/addModel'
 import { cloneDeep } from 'lodash-es'
-import type { Schedule, ScheduleListQuery, ScheduleListResponse } from '@/types/schedule'
+import type { ScheduleListQuery, ScheduleListResponse } from '@/types/schedule'
 import { ref } from 'vue'
 import {
   getScheduleListApi,
@@ -24,10 +19,20 @@ import { useFetchData } from '@/hooks/useFetchData'
 import { getTodayDate } from '@/utils/date'
 import { useEditModelStore } from '@/stores/editModel'
 import { getScheduleInitialData } from '@/constant'
+import eventBus from '@/utils/eventBus'
+
 const router = useRouter()
 const route = useRoute()
 const addModelStore = useAddModelStore()
 const editModelStore = useEditModelStore()
+
+eventBus.on('add-schedule', () => {
+  fetchData()
+})
+
+eventBus.on('edit-schedule', () => {
+  fetchData()
+})
 
 const initialVal: ScheduleListResponse = {
   total: 0,
@@ -57,17 +62,23 @@ const makeQuery: () => ScheduleListQuery = () => {
 
 const query = ref<ScheduleListQuery>(makeQuery())
 
+/* 
+获取日程列表
+*/
 const { data, fetchData, loading } = useFetchData(getScheduleListApi, [query], initialVal)
-fetchData().then(() => {
-  console.log(data, '<===data')
-})
+fetchData()
 
+/* 
+监听路由参数变化，重新获取数据
+*/
 watch([() => route.params.date, () => route.query.status, () => route.query.priority], (params) => {
-  console.log(params, '<==watch')
   query.value = makeQuery()
   fetchData()
 })
 
+/* 
+计算日程总数
+*/
 const totalCount = computed(() => data.value.data.length)
 const completedCount = computed(() => {
   return data.value.data.filter((e) => e.status === 'done').length
@@ -76,7 +87,6 @@ const completedCount = computed(() => {
 /*
 处理各种事件
 */
-
 const handleToggleComplete = async (id: string) => {
   const item = data.value.data.find((e) => e.id === id)
 
@@ -89,12 +99,18 @@ const handleToggleComplete = async (id: string) => {
   } else if (item.status === 'done') {
     item.status = 'pending'
   }
+  /* 
+    发送修改的请求
+  */
   const { fetchData: modifyScheduleFetchData } = useFetchData(modifyScheduleApi, [id, item], {
     schedule: getScheduleInitialData(),
   })
   await modifyScheduleFetchData()
 }
 
+/* 
+    处理编辑事件
+*/
 const handleEdit = (id: string) => {
   const item = data.value.data.find((e) => e.id === id)
   if (item) {
@@ -105,15 +121,11 @@ const handleEdit = (id: string) => {
   }
 }
 
-const wantToDeleteId = ref<string>('')
-
-const { fetchData: deleteScheduleFetchData } = useFetchData(
-  deleteScheduleApi,
-  [wantToDeleteId],
-  undefined,
-)
+/* 
+    处理删除事件
+*/
 const handleDelete = async (id: string) => {
-  wantToDeleteId.value = id
+  const { fetchData: deleteScheduleFetchData } = useFetchData(deleteScheduleApi, [id], undefined)
   try {
     await deleteScheduleFetchData()
     toast.success('删除成功')
@@ -123,6 +135,9 @@ const handleDelete = async (id: string) => {
   }
 }
 
+/* 
+  处理添加新日程事件
+*/
 const handleAddNew = () => {
   addModelStore.addModelOpen = true
   if (route.params.date) {
@@ -130,6 +145,9 @@ const handleAddNew = () => {
   }
 }
 
+/* 
+  处理显示所有日程事件
+*/
 const showAllSchedule = () => {
   router.push({
     name: route.name,
@@ -141,6 +159,9 @@ const showAllSchedule = () => {
   })
 }
 
+/* 
+  处理显示已完成日程事件
+*/
 const showCompletedSchedule = () => {
   router.push({
     name: route.name,
@@ -151,6 +172,10 @@ const showCompletedSchedule = () => {
     },
   })
 }
+
+/* 
+  处理显示未完成日程事件
+*/
 const showUncompletedSchedule = () => {
   console.log(route)
   router.push({
@@ -163,7 +188,9 @@ const showUncompletedSchedule = () => {
   })
 }
 
-// priority filter handlers
+/* 
+  处理清除优先级筛选事件,就是展示全部
+*/
 const clearPriority = () => {
   router.push({
     name: route.name,
@@ -174,6 +201,9 @@ const clearPriority = () => {
     },
   })
 }
+/* 
+  处理设置优先级筛选事件
+*/
 const setPriority = (priority: PriorityLevel) => {
   router.push({
     name: route.name,
@@ -185,7 +215,15 @@ const setPriority = (priority: PriorityLevel) => {
   })
 }
 
+/* 
+  处理生成AI建议事件，就是生成行动建议
+*/
 const generateAISuggest = async (id: string) => {
+  const item = data.value.data.find((e) => e.id === id)
+  if (!item) {
+    console.error('未找到该日程')
+    return
+  }
   const { data: suggest, fetchData: fetchSuggestion } = useFetchData(getAISuggestApi, [id], {
     suggestion: '',
   })
@@ -203,10 +241,19 @@ const generateAISuggest = async (id: string) => {
   )
   await fetchSuggestion()
   await modifySchedule()
-  await fetchData()
+  // await fetchData()
+  item.AIsuggestion = suggest.value.suggestion
 }
+/* 
+  处理清除AI建议事件，就是清除行动建议
+*/
 const removeAISuggest = async (id: string) => {
-  const { data: modifiedSchedule, fetchData: modifySchedule } = useFetchData(
+  const item = data.value.data.find((e) => e.id === id)
+  if (!item) {
+    console.error('未找到该日程')
+    return
+  }
+  const { fetchData: modifySchedule } = useFetchData(
     modifyScheduleApi,
     [
       id,
@@ -217,7 +264,7 @@ const removeAISuggest = async (id: string) => {
     undefined,
   )
   await modifySchedule()
-  await fetchData()
+  item.AIsuggestion = undefined
 }
 </script>
 

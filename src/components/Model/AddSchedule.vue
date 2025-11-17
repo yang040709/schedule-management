@@ -21,7 +21,6 @@ import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import TagItem from '@/components/Tag/TagItem.vue'
-import { useScheduleStore } from '@/stores/schedule'
 import type { ScheduleForm, ScheduleResponse } from '@/types/schedule'
 import { useRouter, useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -33,10 +32,12 @@ import { watch, ref, computed } from 'vue'
 import { useFetchData } from '@/hooks/useFetchData'
 import { addScheduleApi } from '@/api/schedule'
 import { getScheduleInitialData } from '@/constant'
+import eventBus from '@/utils/eventBus'
+import { cloneDeep } from 'lodash-es'
 
 const tagStore = useTagStore()
 const modelStore = useAddModelStore()
-const { addModelOpen, addModelInfo, addResponse } = storeToRefs(modelStore)
+const { addModelOpen, addModelInfo } = storeToRefs(modelStore)
 
 const initResponse: ScheduleResponse = {
   schedule: getScheduleInitialData(),
@@ -50,7 +51,7 @@ const { data, loading, fetchData } = useFetchData(addScheduleApi, [params], init
 const submitFunc = async () => {
   // scheduleStore.setScheduleData(values)
   await fetchData()
-  addResponse.value = data.value.schedule
+  eventBus.emit('add-schedule', cloneDeep(data.value.schedule))
   toast.success('添加日程成功', {
     description: '1秒后跳转到日历页',
   })
