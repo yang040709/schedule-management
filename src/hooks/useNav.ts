@@ -68,6 +68,13 @@ export const useNav = () => {
         icon: ArrowDownUp,
       },
       {
+        text: '习惯',
+        route: {
+          name: 'habit',
+        },
+        icon: Flame,
+      },
+      {
         text: '列表',
         route: {
           name: 'schedule-list',

@@ -40,45 +40,6 @@ export type ScheduleStatus = 'done' | 'pending' | 'expired' | 'canceled'
 
 */
 
-interface CommonScheduleFields {
-  id: string
-  title: string
-  description: string
-  AIsuggestion?: string
-  status: ScheduleStatus
-  priority: PriorityLevel
-  category?: string[]
-  dependentId?: string // 依赖的任务ID
-  createdAt: string
-  updatedAt: string
-  timeOfDay?: {
-    startTime: string // "08:00" 或 "08:00:00"
-    endTime: string // "09:00"
-  }
-}
-
-// interface ScheduleSingle extends CommonScheduleFields {
-//   /*
-//   下面是时间相关的规则
-//   */
-//   // === 时间与重复规则 ===
-//   scheduleType: 'single' // 单次 or 每日重复
-//   // 单次任务：一个具体的日期（必填）
-//   singleDate: string // ISO 8601 日期，如 "2025-11-15"
-// }
-// interface ScheduleDaily extends CommonScheduleFields {
-//   /*
-//   下面是时间相关的规则
-//   */
-//   // === 时间与重复规则 ===
-//   scheduleType: 'daily' // 单次 or 每日重复
-//   // 重复任务：起止日期（闭区间）
-//   recurrence: {
-//     startDate: string // "2025-11-01"
-//     endDate: string // "2025-11-10"
-//   }
-// }
-
 export type Schedule = {
   id: string
   title: string
@@ -147,21 +108,10 @@ export interface FlowScheduleForm {
   date: string
 }
 
-interface _ModifyScheduleForm {
-  title: string
-  description: string
-  AIsuggestion?: string
-  status: ScheduleStatus
-  priority: PriorityLevel
-  category?: string[]
-  dependentId?: string // 依赖的任务ID
-  date: string
-  timeOfDay?: {
-    startTime: string // "08:00" 或 "08:00:00"
-    endTime: string // "09:00"
-  }
-}
-
+/* 
+  除了id、createdAt、updatedAt字段，其他字段都可以修改
+*/
+type _ModifyScheduleForm = Omit<Schedule, 'id' | 'createdAt' | 'updatedAt'>
 export type ModifyScheduleForm = Partial<_ModifyScheduleForm>
 
 export interface GenerateSchedule {
