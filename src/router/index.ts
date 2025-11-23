@@ -110,6 +110,8 @@ const router = createRouter({
   ],
 })
 
+const noLoginCanAccessRoutes = ['login', 'register']
+
 router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
   if (!userStore.isTryGetUserInfo) {
@@ -121,10 +123,30 @@ router.beforeEach(async (to, from, next) => {
       userStore.isTryGetUserInfo = true
     }
   }
-  setupRouteMeta(to, from)
+  if (!userStore.isLogin) {
+    if (!to.name || !noLoginCanAccessRoutes.includes(to.name as string)) {
+      next({
+        name: 'login',
+      })
+      return
+    }
+    /* 否则则放行 */
+    next()
+    return
+  }
+  if (to.name && noLoginCanAccessRoutes.includes(to.name as string)) {
+    /* 
+      如果用户已经登录，则跳转到首页，不能跳转到登录注册页
+    */
+    next({
+      name: 'home',
+    })
+    return
+  }
   next()
 })
 router.afterEach((to, from) => {
+  setupRouteMeta(to, from)
   // const appStore = useAppStore()
   // if (to.meta.title) {
   //   appStore.setTitle(to.meta.title)

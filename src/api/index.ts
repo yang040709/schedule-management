@@ -26,7 +26,8 @@ request.interceptors.response.use(
     if (response.data.code === 0) {
       return response.data.data
     }
-    toast.error(response.data.message)
+    // toast.error(response.data.message)
+    console.error(response.data.message)
     return Promise.reject(response.data.message)
   },
   (error) => {

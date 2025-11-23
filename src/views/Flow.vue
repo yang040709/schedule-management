@@ -64,6 +64,7 @@ onConnect((params) => {
     [
       targetNode.id,
       {
+        status: "locked",
         dependentId: sourceNode.data.id,
       },
     ],
@@ -112,30 +113,18 @@ const defaultViewport = {
 </script>
 
 <template>
-  <div
-    class="flex w-full border-1"
-    @drop="onDrop"
-    id="yang-flow-container"
-    :style="{
-      'max-height': `calc(100vh - ${APP_CONFIG.HeaderHeight + 3}px)`,
-      height: `calc(100vh - ${APP_CONFIG.HeaderHeight + 3}px)`,
-    }"
-  >
+  <div class="flex w-full border-1" @drop="onDrop" id="yang-flow-container" :style="{
+    'max-height': `calc(100vh - ${APP_CONFIG.HeaderHeight + 3}px)`,
+    height: `calc(100vh - ${APP_CONFIG.HeaderHeight + 3}px)`,
+  }">
     <!-- :style="{ height: `calc(100vh - ${APP_CONFIG.HeaderHeight})` }" -->
     <FlowSideBar @save="handleSave" @reset="handleReset" />
 
-    <VueFlow
-      v-model:nodes="nodes"
-      v-model:edges="edges"
-      :default-viewport="defaultViewport"
-      @dragover="onDragOver"
-      @dragleave="onDragLeave"
-      :style="{
+    <VueFlow v-model:nodes="nodes" v-model:edges="edges" :default-viewport="defaultViewport" @dragover="onDragOver"
+      @dragleave="onDragLeave" :style="{
         backgroundColor: isDragOver ? '#e7f3ff' : 'transparent',
         transition: 'background-color 0.2s ease',
-      }"
-      class="flex-1"
-    >
+      }" class="flex-1">
       <Background />
       <!-- <Controls /> -->
       <!-- <MiniMap /> -->

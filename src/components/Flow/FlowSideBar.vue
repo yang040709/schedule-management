@@ -44,6 +44,8 @@ const addModelStore = useAddModelStore()
 
 eventBus.on('add-schedule', (schedule) => {
   // console.log('add-schedule',schedule)
+  console.log(schedule, "<==$bus");
+
   scheduleList.value.push(schedule)
 })
 
@@ -60,9 +62,7 @@ eventBus.on('add-schedule', (schedule) => {
       <div class="p-4 border-b">
         <h2 class="font-bold text-lg">添加日程节点</h2>
         <p class="text-sm text-gray-500 mt-4 mb-2">填写表单添加日程</p>
-        <Button variant="outline" @click="addModelStore.addModelOpen = true" class="w-full"
-          >填写表单添加日程</Button
-        >
+        <Button variant="outline" @click="addModelStore.addModelOpen = true" class="w-full">填写表单添加日程</Button>
         <p class="text-sm text-gray-500 mt-4 mb-2">快速添加日程</p>
         <IntelligentTaskInput />
       </div>
@@ -71,21 +71,14 @@ eventBus.on('add-schedule', (schedule) => {
         <p class="text-sm text-gray-500 mb-2">您可以拖动下面日程节点到面板中</p>
         <p class="text-sm text-gray-500 mb-2">建立日程间的联系</p>
         <div></div>
-        <NodeTemplate
-          v-for="schedule in scheduleList"
-          :key="schedule.id"
-          :schedule="schedule"
-          class="mt-4 hover:bg-gray-50 cursor-move transition-colors"
-          :draggable="true"
-          @dragstart="onDragStart($event, 'schedule', schedule)"
-          :only-view="true"
-        />
+        <NodeTemplate v-for="schedule in scheduleList" :key="schedule.id" :schedule="schedule"
+          class="mt-4 hover:bg-gray-50 cursor-move transition-colors" :draggable="true"
+          @dragstart="onDragStart($event, 'schedule', schedule)" :only-view="true" />
       </div>
     </div>
 
     <div
-      class="h-[70px] flex p-4 justify-between bg-white gap-10 border-t border-gray-200 fixed bottom-0 left-0 w-[320px]"
-    >
+      class="h-[70px] flex p-4 justify-between bg-white gap-10 border-t border-gray-200 fixed bottom-0 left-0 w-[320px]">
       <Button class="flex-1" @click="emit('save')">保存</Button>
       <Button variant="secondary" class="flex-1" @click="emit('reset')">重置</Button>
     </div>

@@ -40,7 +40,7 @@ const {
   data: addResponseData,
   fetchData: fetchAddData,
   loading: addLoading,
-} = useFetchData(addScheduleApi, [data.value], {
+} = useFetchData(addScheduleApi, [data], {
   schedule: getScheduleInitialData(),
 })
 
@@ -48,6 +48,7 @@ const confirmAdd = async () => {
   await fetchAddData()
   eventBus.emit('add-schedule', cloneDeep(addResponseData.value.schedule))
   toast.success('任务添加成功')
+  userInput.value.content = ''
   resetParse()
 }
 
@@ -77,19 +78,11 @@ const handleSubmit = async () => {
     <h2 class="text-lg font-semibold text-gray-900 mb-4">快速添加任务</h2>
     <div class="space-y-4">
       <div class="flex flex-col space-y-4">
-        <Textarea
-          v-model="userInput.content"
-          type="text"
-          placeholder="输入任务，如：下周一上午10点和小王开会。我们将使用大模型帮你添加任务。"
+        <Textarea v-model="userInput.content" type="text" placeholder="输入任务，如：下周一上午10点和小王开会。我们将使用大模型帮你添加任务。"
           class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-          :class="{ 'border-error': parseStatus === 'error' && userInput.content.trim() }"
-          @input="resetParse"
-        />
-        <Button
-          @click="handleSubmit"
-          class="bg-primary text-white px-6 py-3 rounded-lg font-medium transition-colors"
-          :disabled="parseStatus === 'parsing'"
-        >
+          :class="{ 'border-error': parseStatus === 'error' && userInput.content.trim() }" @input="resetParse" />
+        <Button @click="handleSubmit" class="bg-primary text-white px-6 py-3 rounded-lg font-medium transition-colors"
+          :disabled="parseStatus === 'parsing'">
           <i class="fas fa-magic mr-2"></i>
           <span v-if="parseStatus !== 'parsing'">智能解析</span>
           <span v-else>解析中... </span>
@@ -97,10 +90,8 @@ const handleSubmit = async () => {
       </div>
 
       <!-- 未解析状态 -->
-      <div
-        v-if="parseStatus === 'unparsed' && userInput.content.trim()"
-        class="bg-gray-50 border border-gray-200 rounded-lg p-4"
-      >
+      <div v-if="parseStatus === 'unparsed' && userInput.content.trim()"
+        class="bg-gray-50 border border-gray-200 rounded-lg p-4">
         <h3 class="text-gray-800 font-semibold mb-2 flex items-center">
           <i class="fas fa-info-circle mr-2"></i>提示
         </h3>
@@ -108,10 +99,7 @@ const handleSubmit = async () => {
       </div>
 
       <!-- 解析成功状态 -->
-      <div
-        v-if="parseStatus === 'success'"
-        class="bg-blue-50 border border-blue-200 rounded-lg p-4"
-      >
+      <div v-if="parseStatus === 'success'" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h3 class="text-blue-800 font-semibold mb-2 flex items-center">
           <i class="fas fa-check-circle mr-2"></i>解析结果
         </h3>

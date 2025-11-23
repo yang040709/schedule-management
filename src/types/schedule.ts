@@ -30,10 +30,8 @@ export interface ScheduleListQuery {
   status?: ScheduleStatus
   priority?: string
   date?: string
-  dateRange?: {
-    startDate: string // "2025-11-01"
-    endDate: string // "2025-11-10"
-  }
+  dateRangeStartDate?: string // "2025-11-01"
+  dateRangeEndDate?: string // "2025-11-10"
   page?: number
   pageSize?: number
 }

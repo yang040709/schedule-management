@@ -33,13 +33,13 @@ const priorityMap = {
 }
 
 const relativeSingleTime = computed(() => {
-  if (schedule.value.date === getTodayDate()) {
+  const date = dayjs(schedule.value.date).format('YYYY-MM-DD')
+  if (date === getTodayDate()) {
     return '今天'
   } else {
-    return dayjs().to(dayjs(schedule.value.date))
+    return date
   }
 })
-
 type StatusMap = {
   [K in ScheduleStatus]: {
     class: string
@@ -81,14 +81,22 @@ const handleEditClick = () => {
   editModelStore.editModelOpen = true
   editModelStore.editModelInfo = schedule.value
 }
+
+
+const createdAt = computed(() => {
+  return dayjs(schedule.value.createdAt).format('YYYY-MM-DD HH:mm:ss')
+})
+
+const updatedAt = computed(() => {
+  return dayjs(schedule.value.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+})
+
 </script>
 
 <template>
   <!-- 日程详情卡片 -->
   <Dialog v-model:open="isOpen">
-    <DialogContent
-      class="sm:max-w-[425px] md:max-w-[600px] lg:max-w-[800px] h-[90vh] overflow-hidden block"
-    >
+    <DialogContent class="sm:max-w-[425px] md:max-w-[600px] lg:max-w-[800px] h-[90vh] overflow-hidden block">
       <DialogHeader>
         <DialogTitle>日程详情</DialogTitle>
         <DialogDescription> 查看日程详情 </DialogDescription>
@@ -97,15 +105,13 @@ const handleEditClick = () => {
         <!-- 标题区 -->
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2">
-            <span
-              :class="statusMap[schedule.status].class"
-              class="inline-block px-3 py-2 text-xs font-medium rounded-full"
-            >
+            <span :class="statusMap[schedule.status].class"
+              class="inline-block px-3 py-2 text-xs font-medium rounded-full">
               {{ statusMap[schedule.status].text }}
             </span>
             <h1 class="text-xl font-semibold text-gray-900">{{ schedule.title }}</h1>
           </div>
-          <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">ID: sch-009</span>
+          <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">ID: {{ schedule.id }}</span>
         </div>
 
         <!-- 描述 -->
@@ -114,65 +120,54 @@ const handleEditClick = () => {
         <!-- 标签区 -->
         <div class="flex flex-wrap gap-2 mb-4">
           <!-- 分类标签 -->
-          <span
-            v-for="item in schedule.category"
-            :key="item"
-            class="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
-          >
+          <span v-for="item in schedule.category" :key="item"
+            class="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
             {{ item }}
           </span>
           <!-- 优先级标签 -->
-          <span
-            class="px-2.5 py-1 text-xs font-medium rounded-full"
-            :class="priorityMap[schedule.priority].class"
-            >{{ priorityMap[schedule.priority].text }}</span
-          >
+          <span class="px-2.5 py-1 text-xs font-medium rounded-full" :class="priorityMap[schedule.priority].class">{{
+            priorityMap[schedule.priority].text }}</span>
 
           <!-- 时间段 -->
-          <span
-            v-if="schedule.timeOfDay"
-            class="px-2.5 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full"
-            >{{ schedule.timeOfDay.startTime }} - {{ schedule.timeOfDay.endTime }}</span
-          >
+          <span v-if="schedule.timeOfDay"
+            class="px-2.5 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">{{
+              schedule.timeOfDay.startTime }} - {{ schedule.timeOfDay.endTime }}</span>
           <!-- 创建时间（示例：1个月前） -->
           <span class="px-2.5 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded-full">{{
             relativeSingleTime
           }}</span>
         </div>
         <!-- AI 建议 -->
-        <div class="mb-5">
+        <div class="mb-5" v-if="schedule.AIsuggestion && schedule.AIsuggestion.trim() !== ''">
           <p class="text-gray-600 text-sm">
             <span class="font-medium text-gray-800">行动建议：</span>
-            提前准备应急预案，预判客户可能提出的3个核心疑问
+            <span class="text-gray-500">{{ schedule.AIsuggestion }}</span>
           </p>
         </div>
 
-        <!-- 操作按钮 -->
+        <!-- 操作按钮
         <div class="flex gap-3 pt-3 border-t border-gray-100">
           <button
             class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md text-sm font-medium hover:bg-gray-300 transition"
-            @click="handleEditClick"
-          >
+            @click="handleEditClick">
             编辑
           </button>
-          <button
-            class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition"
-          >
+          <button class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition">
             标记为完成
           </button>
           <button
-            class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 transition"
-          >
+            class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 transition">
             取消
           </button>
-        </div>
+        </div> -->
 
         <!-- 元信息（可选折叠） -->
         <div class="mt-6 pt-4 text-xs text-gray-500 border-t border-gray-100 space-y-1">
-          <div><span class="font-medium">创建时间：</span> 2024年10月15日 14:30</div>
-          <div><span class="font-medium">最后更新：</span> 2024年10月16日 09:15</div>
-          <div><span class="font-medium">日期：</span> 2024年10月17日</div>
-          <div><span class="font-medium">依赖任务 ID：</span> sch-005</div>
+          <div><span class="font-medium">创建时间：</span> {{ createdAt }}</div>
+          <div><span class="font-medium">最后更新：</span> {{ updatedAt }}</div>
+          <div><span class="font-medium">日期：</span> {{ schedule.date }}</div>
+          <div><span class="font-medium" v-if="schedule.dependentSchedule">依赖任务 ID：</span>
+            {{ schedule.dependentSchedule?.id }}</div>
         </div>
       </div>
     </DialogContent>
