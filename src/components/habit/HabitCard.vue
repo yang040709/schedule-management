@@ -1,18 +1,37 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { Pencil, Trash, Check, Ellipsis, Ban } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import type { TodayHabit } from '@/types/habit'
+import CheckInDialog from './CheckInDialog.vue'
+import type { TodayHabit, CheckInForm } from '@/types/habit'
 
 interface Props {
   habit: TodayHabit
-  onCheckIn: (habitId: string) => void
   onEdit: (habit: TodayHabit) => void
   onDelete: (habitId: string) => void
   onCancelCheckIn: (habitId: string) => void
 }
 
-defineProps<Props>()
+interface Emits {
+  (e: 'checkIn', form: CheckInForm): void
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
+
+// 打卡弹窗状态
+const checkInDialogOpen = ref(false)
+
+// 处理打卡按钮点击
+const handleCheckInClick = () => {
+  checkInDialogOpen.value = true
+}
+
+// 处理打卡表单提交
+const handleCheckInSubmit = (form: CheckInForm) => {
+  emit('checkIn', form)
+}
 
 // 获取进度百分比
 const getProgressPercentage = (habit: TodayHabit) => {
@@ -97,17 +116,18 @@ const getFrequencyText = (frequency: string) => {
       <div class="flex space-x-2 items-center">
         <Button
           v-if="!habit.completed"
-          @click="onCheckIn(habit.id)"
+          @click="handleCheckInClick"
+          aria-describedby="打卡日程"
           class="h-10 flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2.5 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg flex items-center justify-center"
         >
           <Check class="mr-2" />
-          完成打卡
+          打卡
         </Button>
         <template v-else>
           <div
             class="h-10 text-[14px] flex-1 border-1 ont-semibold py-2.5 rounded-lg transform shadow-md flex items-center justify-center"
           >
-            已完成打卡
+            已打卡
           </div>
         </template>
 
@@ -121,7 +141,7 @@ const getFrequencyText = (frequency: string) => {
             <Button
               v-if="habit.completed"
               @click="onCancelCheckIn(habit.id)"
-              class="h-10 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-2.5 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg flex items-center justify-center"
+              class="h-10 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-2.5 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg flex items-center justify-center"
             >
               <Ban class="mr-2" />
               取消打卡
@@ -146,5 +166,15 @@ const getFrequencyText = (frequency: string) => {
         </Popover>
       </div>
     </div>
+
+    <!-- 打卡弹窗 -->
+    <CheckInDialog
+      :open="checkInDialogOpen"
+      :habit-id="habit.id"
+      :habit-title="habit.title"
+      :default-duration="habit.goal.durationMinutes"
+      @update:open="checkInDialogOpen = $event"
+      @submit="handleCheckInSubmit"
+    />
   </div>
 </template>

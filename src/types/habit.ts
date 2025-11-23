@@ -32,6 +32,11 @@ export interface HabitStats {
   successRate: number // 成功率 0-100
 }
 
+export interface AllStats {
+  totalCheckedIn: number // 总打卡次数
+  avgSuccessRate: number // 所有习惯的成功率平均值
+}
+
 // 完整习惯对象
 export interface Habit extends HabitBase {
   stats: HabitStats
@@ -108,12 +113,14 @@ export interface HabitForm {
 }
 
 // 修改习惯表单
-export type ModifyHabitForm = Partial<Omit<Habit, 'id' | 'createdAt' | 'updatedAt' | 'stats'>>
-
+// export type ModifyHabitForm = Partial<Omit<Habit, 'id' | 'createdAt' | 'updatedAt' | 'stats'>>
+export type ModifyHabitForm = {
+  goal: Partial<Goal>
+} & Partial<Omit<Habit, 'id' | 'createdAt' | 'updatedAt' | 'stats'>>
 // 打卡表单
 export interface CheckInForm {
   habitId: string
+  duration: number
   notes?: string
   mood?: number
-  duration?: number
 }

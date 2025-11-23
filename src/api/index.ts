@@ -1,5 +1,7 @@
+import { useUserStore } from '@/stores/user'
 import { logResponse } from '@/utils'
 import axios from 'axios'
+import { toast } from 'vue-sonner'
 
 const request = axios.create({
   baseURL: '/api',
@@ -8,10 +10,9 @@ const request = axios.create({
 
 request.interceptors.request.use(
   (config) => {
-    // 添加token
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    const userStore = useUserStore()
+    if (userStore.token) {
+      config.headers.Authorization = `Bearer ${userStore.token}`
     }
     return config
   },
@@ -22,9 +23,10 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   (response) => {
     logResponse(response, false)
-    if (response.data.code === 200) {
+    if (response.data.code === 0) {
       return response.data.data
     }
+    toast.error(response.data.message)
     return Promise.reject(response.data.message)
   },
   (error) => {

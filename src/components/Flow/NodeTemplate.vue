@@ -86,6 +86,11 @@ const statusMap = {
     text: '已取消',
     color: 'red-100',
   },
+  locked: {
+    class: 'px-3 py-1 text-xs font-bold text-gray-600 bg-gray-50',
+    text: '已锁定',
+    color: 'gray-50',
+  },
 }
 
 const handleEdit = () => {
@@ -271,8 +276,8 @@ const handleDelete = () => {
       </div>
 
       <!-- 依赖 -->
-      <div v-if="schedule.dependentId" class="text-sm text-gray-500">
-        前置日程： {{ schedule.dependentId }}
+      <div v-if="schedule.dependentSchedule" class="text-sm text-gray-500">
+        前置日程： {{ schedule.dependentSchedule.id }}
       </div>
       <!-- 分类标签 -->
       <div v-if="schedule.category && schedule.category.length > 0" class="flex flex-wrap gap-1">

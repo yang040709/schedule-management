@@ -1,0 +1,43 @@
+# 日程管理应用 - robots.txt
+# 最后更新: 2025-11-20
+
+User-agent: *
+Allow: /
+
+# 禁止搜索引擎抓取的路径
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+Disallow: /test/
+Disallow: /login
+Disallow: /register
+Disallow: /setting
+
+# 允许搜索引擎抓取的页面
+Allow: /today
+Allow: /calendar
+Allow: /habits
+Allow: /flow
+Allow: /schedule-list
+Allow: /about
+
+# 网站地图位置
+Sitemap: https://your-domain.com/sitemap.xml
+
+# 爬取延迟设置（可选）
+# Crawl-delay: 10
+
+# 特定搜索引擎设置
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+# 禁止所有搜索引擎（如果需要完全禁止索引，取消注释下面两行）
+# User-agent: *
+# Disallow: /

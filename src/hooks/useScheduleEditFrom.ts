@@ -14,7 +14,7 @@ import { computed, watch, ref } from 'vue'
 
 import { useTagStore } from '@/stores/tag'
 
-import type { ScheduleForm } from '@/types/schedule'
+import type { ModifyScheduleFormWithId, ScheduleForm } from '@/types/schedule'
 import { toast } from 'vue-sonner'
 import { getTodayDate } from '@/utils/date'
 import type { ModifyScheduleForm } from '@/types/schedule'
@@ -50,7 +50,7 @@ export const useScheduleEditFrom = (submitFunc: () => void) => {
 
   const placeholder = ref()
 
-  const { handleSubmit, setFieldValue, values, validate } = useForm<ModifyScheduleForm>({
+  const { handleSubmit, setFieldValue, values, validate } = useForm<ModifyScheduleFormWithId>({
     validationSchema: formSchema,
   })
 

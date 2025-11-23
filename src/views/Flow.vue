@@ -57,7 +57,7 @@ onConnect((params) => {
     console.error('连接失败，源节点或目标节点不存在')
     return
   }
-  targetNode.data.dependentId = sourceNode.data.id
+  targetNode.data.dependentSchedule = sourceNode.data
   addEdges([{ ...params, id: getTemplateId(), markerEnd: 'arrowclosed' }])
   useFetchData(
     modifyScheduleApi,

@@ -79,14 +79,14 @@ const initValue = {}
 watch(
   () => editModelInfo.value,
   () => {
-    setFieldValue('id' as keyof ScheduleForm, editModelInfo.value.id)
+    setFieldValue('id', editModelInfo.value.id)
     setFieldValue('date', editModelInfo.value.date)
     setFieldValue('title', editModelInfo.value.title)
     setFieldValue('description', editModelInfo.value.description)
     setFieldValue('category', editModelInfo.value.category)
     setFieldValue('priority', editModelInfo.value.priority)
     setFieldValue('status', editModelInfo.value.status)
-    setFieldValue('dependentId', editModelInfo.value.dependentId)
+    setFieldValue('dependentId', editModelInfo.value.dependentSchedule?.id)
     setFieldValue('AIsuggestion', editModelInfo.value.AIsuggestion)
     if (editModelInfo.value.timeOfDay) {
       setFieldValue('timeOfDay', editModelInfo.value.timeOfDay)

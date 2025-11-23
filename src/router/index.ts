@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { getTodayDate } from '@/utils/date'
+import { setupRouteMeta } from '@/utils/meta'
+import { useUserStore } from '@/stores/user'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -108,14 +110,25 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
+  const userStore = useUserStore()
+  if (!userStore.isTryGetUserInfo) {
+    try {
+      await userStore.getUserInfo()
+    } catch (error) {
+      console.log('获取用户信息失败')
+    } finally {
+      userStore.isTryGetUserInfo = true
+    }
+  }
+  setupRouteMeta(to, from)
   next()
 })
 router.afterEach((to, from) => {
-  const appStore = useAppStore()
-  if (to.meta.title) {
-    appStore.setTitle(to.meta.title)
-  }
+  // const appStore = useAppStore()
+  // if (to.meta.title) {
+  //   appStore.setTitle(to.meta.title)
+  // }
 })
 
 export default router

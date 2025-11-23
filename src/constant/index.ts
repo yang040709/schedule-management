@@ -12,6 +12,7 @@ export const statusMap: Record<ScheduleStatus, string> = {
   pending: '未完成',
   expired: '已过期',
   canceled: '已取消',
+  locked: '已锁定',
 } as const
 
 export const getScheduleInitialData: () => Schedule = () => {

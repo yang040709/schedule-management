@@ -27,6 +27,7 @@ export const useUserStore = defineStore('user', () => {
       user.value.role = res.role
       return res
     } catch (err) {
+      logout()
       return Promise.reject(err)
     } finally {
       loading.value = false
@@ -42,6 +43,7 @@ export const useUserStore = defineStore('user', () => {
       user.value.role = res.role
       return res
     } catch (err) {
+      logout()
       return Promise.reject(err)
     } finally {
       loading.value = false
@@ -56,6 +58,7 @@ export const useUserStore = defineStore('user', () => {
       user.value.role = res.role
       return res
     } catch (err) {
+      logout()
       return Promise.reject(err)
     } finally {
       loading.value = false

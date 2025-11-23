@@ -4,7 +4,7 @@ import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Button } from '../ui/button'
 import { toast } from 'vue-sonner'
-import type { PriorityLevel, ScheduleStatus } from '@/types/schedule'
+import type { PriorityLevel, Schedule, ScheduleStatus } from '@/types/schedule'
 import { useAddModelStore } from '@/stores/addModel'
 import { cloneDeep } from 'lodash-es'
 import type { ScheduleListQuery, ScheduleListResponse } from '@/types/schedule'
@@ -62,10 +62,36 @@ const makeQuery: () => ScheduleListQuery = () => {
 
 const query = ref<ScheduleListQuery>(makeQuery())
 
+const taskDependencies = ref<Map<string, Schedule[]>>(new Map())
+
+// 当获取到任务列表时，构建依赖关系
+const buildTaskDependencies = (tasks: Schedule[]) => {
+  // 初始化所有任务的子任务列表
+  tasks.forEach((task) => {
+    taskDependencies.value.set(task.id, [])
+  })
+
+  // 填充依赖关系
+  tasks.forEach((task) => {
+    if (task.dependentSchedule) {
+      const parentId = task.dependentSchedule.id
+      if (taskDependencies.value.has(parentId)) {
+        taskDependencies.value.get(parentId)!.push(task)
+      }
+    }
+  })
+}
 /* 
 获取日程列表
 */
-const { data, fetchData, loading } = useFetchData(getScheduleListApi, [query], initialVal)
+const { data, fetchData, loading } = useFetchData(getScheduleListApi, [query], initialVal, {
+  afterSuccessFetchData: () => {
+    /* 
+      构建任务依赖关系
+    */
+    buildTaskDependencies(data.value.data)
+  },
+})
 fetchData()
 
 /* 
@@ -106,6 +132,38 @@ const handleToggleComplete = async (id: string) => {
     schedule: getScheduleInitialData(),
   })
   await modifyScheduleFetchData()
+  if (item.status === 'done') {
+    if (taskDependencies.value.has(id)) {
+      const schedules = taskDependencies.value.get(id)
+      if (!schedules) {
+        return
+      }
+      schedules.forEach((e) => {
+        // console.log(e, '<==e', e.status)
+        if (e.status === 'locked') {
+          /* 
+          把子任务状态设为待办
+        */
+          e.status = 'pending'
+        }
+      })
+    }
+  } else if (item.status === 'pending') {
+    if (taskDependencies.value.has(id)) {
+      const schedules = taskDependencies.value.get(id)
+      if (!schedules) {
+        return
+      }
+      schedules.forEach((e) => {
+        if (e.status === 'pending') {
+          /* 
+          把子任务状态设为待办
+        */
+          e.status = 'locked'
+        }
+      })
+    }
+  }
 }
 
 /* 
@@ -266,6 +324,29 @@ const removeAISuggest = async (id: string) => {
   await modifySchedule()
   item.AIsuggestion = undefined
 }
+
+const handleCancel = async (id: string) => {
+  const item = data.value.data.find((e) => e.id === id)
+  if (!item) {
+    console.error('未找到该日程')
+    return
+  }
+  const cancelStatus: ScheduleStatus = 'canceled'
+  const { data: modifiedSchedule, fetchData: modifySchedule } = useFetchData(
+    modifyScheduleApi,
+    [
+      id,
+      () => ({
+        status: cancelStatus,
+      }),
+    ],
+    {
+      schedule: getScheduleInitialData(),
+    },
+  )
+  await modifySchedule()
+  item.status = cancelStatus
+}
 </script>
 
 <template>
@@ -402,6 +483,7 @@ const removeAISuggest = async (id: string) => {
             @delete="handleDelete"
             @generate-ai-suggest="generateAISuggest"
             @remove-ai-suggest="removeAISuggest"
+            @cancel="handleCancel"
           />
         </div>
       </div>

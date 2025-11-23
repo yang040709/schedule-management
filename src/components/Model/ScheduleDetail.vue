@@ -68,6 +68,11 @@ const statusMap: StatusMap = {
     text: '已取消',
     color: 'red-100',
   },
+  locked: {
+    class: 'text-gray-600 bg-gray-50',
+    text: '已锁定',
+    color: 'gray-50',
+  },
 }
 
 const editModelStore = useEditModelStore()

@@ -9,6 +9,7 @@ import type {
   CheckInRecordsResponse,
   CheckInForm,
   AchievementsResponse,
+  AllStats,
 } from '@/types/habit'
 
 // 获取习惯列表
@@ -86,4 +87,12 @@ export const getAchievementsApi = () => {
     url: '/achievements',
     method: 'get',
   }) as Promise<AchievementsResponse>
+}
+
+// 获取所有习惯的统计信息
+export const getAllStatsApi = () => {
+  return request({
+    url: '/habits/stats',
+    method: 'get',
+  }) as Promise<AllStats>
 }
