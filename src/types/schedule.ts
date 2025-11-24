@@ -41,6 +41,10 @@ export interface ScheduleListResponse {
   data: Schedule[]
 }
 
+export interface ScheduleFlowResponse {
+  flow: Schedule[]
+}
+
 export interface ScheduleResponse {
   schedule: Schedule
 }

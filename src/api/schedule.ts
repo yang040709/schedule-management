@@ -7,6 +7,7 @@ import type {
   ScheduleResponse,
   ModifyScheduleForm,
   AISuggest,
+  ScheduleFlowResponse,
 } from '@/types/schedule'
 
 export const getScheduleListApi = (query: ScheduleListQuery) => {
@@ -15,6 +16,13 @@ export const getScheduleListApi = (query: ScheduleListQuery) => {
     method: 'get',
     params: query,
   }) as Promise<ScheduleListResponse>
+}
+
+export const getScheduleFlowApi = (id: string) => {
+  return request({
+    url: `/schedule/${id}/flow`,
+    method: 'get',
+  }) as Promise<ScheduleFlowResponse>
 }
 
 export const addScheduleApi = (data: ScheduleForm) => {

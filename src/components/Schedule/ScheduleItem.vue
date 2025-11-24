@@ -9,6 +9,8 @@ import dayjs from '@/utils/dayjs'
 import { getTodayDate } from '@/utils/date'
 import { useDetailModelStore } from '@/stores/detailModel'
 import Dialog from '../components/Dialog.vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 const props = defineProps<{ item: Schedule }>()
 const detailModelStore = useDetailModelStore()
@@ -130,6 +132,14 @@ const hasUncompletedDependency = computed(() => {
 //     return 'bg-gray-50'
 //   }
 // })
+const showInFlow = () => {
+  router.push({
+    name: 'flow',
+    query: {
+      id: props.item.id,
+    },
+  })
+}
 </script>
 
 <template>
@@ -307,6 +317,10 @@ const hasUncompletedDependency = computed(() => {
           <button class="px-3 py-1 bg-[#3B82F6] text-white rounded text-sm hover:bg-[#3B82F6]/90 transition-colors"
             @click="showDetail">
             详情
+          </button>
+          <button class="px-3 py-1 bg-[#3B82F6] text-white rounded text-sm hover:bg-[#3B82F6]/90 transition-colors"
+            @click="showInFlow">
+            流程图
           </button>
           <!-- <button
           class="px-3 py-1 bg-gray-200 text-gray-800 rounded text-sm hover:bg-gray-300 transition-colors"

@@ -8,10 +8,25 @@ import {
 } from '@/components/ui/dropdown-menu'
 import FallbackImage from '@/components/FallbackImage.vue'
 import { useUserStore } from '@/stores/user'
-const handleClick = () => {
-  console.log('click')
-}
+import { useRouter } from 'vue-router'
+
 const useStore = useUserStore()
+
+
+const router = useRouter();
+const handleLogout = () => {
+  useStore.logout()
+  router.push({
+    name: "login"
+  })
+}
+
+const navToSetting = () => {
+  router.push({
+    name: 'setting',
+  })
+}
+
 </script>
 
 <template>
@@ -20,13 +35,8 @@ const useStore = useUserStore()
       <FallbackImage src="/avatar.png" class="w-10 h-10 rounded-full" alt="avatar" />
     </DropdownMenuTrigger>
     <DropdownMenuContent class="w-56">
-      <DropdownMenuItem @click="handleClick">
-        <RouterLink
-          :to="{
-            name: 'setting',
-          }"
-          >设置</RouterLink
-        >
+      <DropdownMenuItem @click="navToSetting">
+        设置
       </DropdownMenuItem>
       <DropdownMenuSeparator />
       <DropdownMenuItem disabled>
@@ -37,8 +47,8 @@ const useStore = useUserStore()
         <a href="https://github.com/yang040709" target="_blank" class="hover:underline">GitHub</a>
       </DropdownMenuItem>
       <DropdownMenuSeparator />
-      <DropdownMenuItem @click="useStore.logout()">
-        <button @click="useStore.logout()" class="cursor-pointer">登出</button>
+      <DropdownMenuItem @click="handleLogout">
+        <button class="cursor-pointer">登出</button>
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>

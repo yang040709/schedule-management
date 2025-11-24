@@ -17,6 +17,56 @@ import { useFetchData } from '@/hooks/useFetchData'
 import { modifyScheduleApi } from '@/api/schedule'
 import { getScheduleInitialData } from '@/constant'
 import eventBus from '@/utils/eventBus'
+import { getScheduleFlowApi } from '@/api/schedule'
+import { useRoute } from 'vue-router'
+
+
+const nodes = ref<Node<Schedule>[]>([])
+const edges = ref<Edge[]>([])
+
+const route = useRoute();
+
+const flowId = ref(route.query.id as string || '')
+const { data, fetchData, loading } = useFetchData(getScheduleFlowApi, [flowId], { flow: [] })
+
+
+const fetchFlowData = async () => {
+  if (flowId.value && flowId.value.trim() !== '') {
+    await fetchData()
+    nodes.value = data.value.flow.map((item, i) => {
+      return {
+        id: item.id,
+        type: 'schedule',
+        position: { x: i * 200, y: i * 200 },
+        data: item,
+      }
+    })
+    await Promise.resolve();
+    data.value.flow.forEach((item) => {
+      if (!item.dependentSchedule || !item.dependentSchedule.id) {
+        return;
+      }
+      edges.value.push({
+        id: getTemplateId(),
+        source: item.id,
+        target: item.dependentSchedule.id,
+        markerEnd: 'arrowclosed',
+      })
+    })
+  }
+}
+
+fetchFlowData();
+
+watch(() => route.query.id, (newId) => {
+  if (newId) {
+    flowId.value = newId as string
+    fetchFlowData()
+  }
+})
+
+
+
 
 eventBus.on('edit-schedule', (schedule) => {
   const node = nodes.value.find((item) => {
@@ -29,8 +79,7 @@ eventBus.on('edit-schedule', (schedule) => {
   }
 })
 
-const nodes = ref<Node<Schedule>[]>([])
-const edges = ref<Edge[]>([])
+
 
 /* 
 首次调用useVueFlow非常重要，

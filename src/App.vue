@@ -10,7 +10,8 @@ useAppStore()
 
 <template>
   <Toaster position="top-center" />
-  <Layout></Layout>
+  <RouterView />
+  <!-- <Layout></Layout> -->
 </template>
 
 <style scoped></style>
