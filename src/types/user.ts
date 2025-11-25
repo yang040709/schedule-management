@@ -2,7 +2,11 @@ export interface LoginResponse {
   userId: string
   username: string
   role: string
-  token: string
+  accessToken: string
+}
+
+export interface RefreshTokenResponse {
+  accessToken: string
 }
 
 export interface LoginFrom {

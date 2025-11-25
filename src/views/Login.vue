@@ -54,7 +54,7 @@ const onSubmit = () => {
 </script>
 
 <template>
-  <div class="bg-gray-50 flex items-center justify-center">
+  <div class="bg-gray-50 h-screen flex items-center justify-center">
     <div class="max-w-md w-full space-y-8">
       <!-- Logo和标题 -->
       <div class="text-center">
@@ -71,13 +71,8 @@ const onSubmit = () => {
             <FormItem class="space-y-2">
               <FormLabel class="text-base font-medium">用户名</FormLabel>
               <FormControl>
-                <Input
-                  type="text"
-                  placeholder="请输入用户名"
-                  v-bind="componentField"
-                  autocomplete="username"
-                  class="h-11 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
-                />
+                <Input type="text" placeholder="请输入用户名" v-bind="componentField" autocomplete="username"
+                  class="h-11 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all" />
               </FormControl>
               <FormMessage class="text-sm" />
             </FormItem>
@@ -86,30 +81,20 @@ const onSubmit = () => {
             <FormItem class="space-y-2">
               <FormLabel class="text-base font-medium">密码</FormLabel>
               <FormControl>
-                <Input
-                  type="password"
-                  placeholder="请输入密码"
-                  v-bind="componentField"
-                  autocomplete="current-password"
-                  class="h-11 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
-                />
+                <Input type="password" placeholder="请输入密码" v-bind="componentField" autocomplete="current-password"
+                  class="h-11 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all" />
               </FormControl>
               <FormMessage class="text-sm" />
             </FormItem>
           </FormField>
           <div class="pt-4">
-            <Button
-              type="submit"
-              class="w-full h-12 text-white font-medium rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-              >登录</Button
-            >
+            <Button type="submit"
+              class="w-full h-12 text-white font-medium rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]">登录</Button>
           </div>
         </form>
         <div class="mt-6">
           <div class="text-center text-sm text-gray-600">
-            还没有账号？<RouterLink to="/register" class="text-blue-500 font-medium hover:underline"
-              >去注册</RouterLink
-            >
+            还没有账号？<RouterLink to="/register" class="text-blue-500 font-medium hover:underline">去注册</RouterLink>
           </div>
         </div>
       </div>

@@ -51,8 +51,7 @@ const getFrequencyText = (frequency: string) => {
 
 <template>
   <div
-    class="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300 hover:border-blue-200 flex flex-col h-full"
-  >
+    class="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300 hover:border-blue-200 flex flex-col h-full">
     <!-- 标题和标签区域 -->
     <div class="flex justify-between items-start mb-4">
       <div class="flex-1">
@@ -60,14 +59,10 @@ const getFrequencyText = (frequency: string) => {
         <p class="text-sm text-gray-600 line-clamp-2">{{ habit.description }}</p>
       </div>
       <div class="flex flex-col items-end space-y-1 ml-3">
-        <span
-          class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full border border-blue-200"
-        >
+        <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full border border-blue-200">
           {{ getFrequencyText(habit.frequency) }}
         </span>
-        <span
-          class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full border border-green-200"
-        >
+        <span class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full border border-green-200">
           {{ habit.goal.durationMinutes }}分钟
         </span>
       </div>
@@ -76,18 +71,12 @@ const getFrequencyText = (frequency: string) => {
     <!-- 进度条 -->
     <div class="mb-4">
       <div class="flex justify-between text-sm text-gray-700 mb-2">
-        <span class="font-medium"
-          >进度 {{ habit.stats.currentStreak }}/{{ habit.goal.targetDays }}天</span
-        >
-        <span class="font-semibold text-blue-600"
-          >{{ Math.round(getProgressPercentage(habit)) }}%</span
-        >
+        <span class="font-medium">进度 {{ habit.stats.totalCompleted }}/{{ habit.goal.targetDays }}天</span>
+        <span class="font-semibold text-blue-600">{{ Math.round(getProgressPercentage(habit)) }}%</span>
       </div>
       <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
-        <div
-          class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500 ease-out"
-          :style="{ width: `${getProgressPercentage(habit)}%` }"
-        ></div>
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500 ease-out"
+          :style="{ width: `${getProgressPercentage(habit)}%` }"></div>
       </div>
     </div>
 
@@ -114,19 +103,14 @@ const getFrequencyText = (frequency: string) => {
     <!-- 操作按钮区域 -->
     <div class="mt-auto pt-4 border-t border-gray-200">
       <div class="flex space-x-2 items-center">
-        <Button
-          v-if="!habit.completed"
-          @click="handleCheckInClick"
-          aria-describedby="打卡日程"
-          class="h-10 flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2.5 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg flex items-center justify-center"
-        >
+        <Button v-if="!habit.completed" @click="handleCheckInClick" aria-describedby="打卡日程"
+          class="h-10 flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2.5 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg flex items-center justify-center">
           <Check class="mr-2" />
           打卡
         </Button>
         <template v-else>
           <div
-            class="h-10 text-[14px] flex-1 border-1 ont-semibold py-2.5 rounded-lg transform shadow-md flex items-center justify-center"
-          >
+            class="h-10 text-[14px] flex-1 border-1 ont-semibold py-2.5 rounded-lg transform shadow-md flex items-center justify-center">
             已打卡
           </div>
         </template>
@@ -138,27 +122,18 @@ const getFrequencyText = (frequency: string) => {
             </Button>
           </PopoverTrigger>
           <PopoverContent class="flex flex-col w-fit gap-3">
-            <Button
-              v-if="habit.completed"
-              @click="onCancelCheckIn(habit.id)"
-              class="h-10 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-2.5 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg flex items-center justify-center"
-            >
+            <Button v-if="habit.completed" @click="onCancelCheckIn(habit.id)"
+              class="h-10 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-2.5 rounded-lg transition-all duration-300 transform shadow-md hover:shadow-lg flex items-center justify-center">
               <Ban class="mr-2" />
               取消打卡
             </Button>
-            <Button
-              @click="onEdit(habit)"
-              variant="outline"
-              class="px-3 border-blue-200 text-blue-600 hover:bg-blue-50 h-10 flex items-center justify-center"
-            >
+            <Button @click="onEdit(habit)" variant="outline"
+              class="px-3 border-blue-200 text-blue-600 hover:bg-blue-50 h-10 flex items-center justify-center">
               <Pencil class="mr-2" />
               编辑习惯
             </Button>
-            <Button
-              @click="onDelete(habit.id)"
-              variant="outline"
-              class="px-3 border-red-200 text-red-600 hover:bg-red-50 h-10 flex items-center justify-center"
-            >
+            <Button @click="onDelete(habit.id)" variant="outline"
+              class="px-3 border-red-200 text-red-600 hover:bg-red-50 h-10 flex items-center justify-center">
               <Trash class="mr-2" />
               删除习惯
             </Button>
@@ -168,13 +143,8 @@ const getFrequencyText = (frequency: string) => {
     </div>
 
     <!-- 打卡弹窗 -->
-    <CheckInDialog
-      :open="checkInDialogOpen"
-      :habit-id="habit.id"
-      :habit-title="habit.title"
-      :default-duration="habit.goal.durationMinutes"
-      @update:open="checkInDialogOpen = $event"
-      @submit="handleCheckInSubmit"
-    />
+    <CheckInDialog :open="checkInDialogOpen" :habit-id="habit.id" :habit-title="habit.title"
+      :default-duration="habit.goal.durationMinutes" @update:open="checkInDialogOpen = $event"
+      @submit="handleCheckInSubmit" />
   </div>
 </template>

@@ -28,3 +28,7 @@ export const getScheduleInitialData: () => Schedule = () => {
     updatedAt: getTodayDateTime(),
   }
 }
+/* 
+  访问令牌的key
+*/
+export const ACCESS_TOKEN_KEY = 'yang-customer-access-token'

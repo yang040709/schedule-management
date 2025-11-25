@@ -37,7 +37,7 @@ const fetchFlowData = async () => {
       return {
         id: item.id,
         type: 'schedule',
-        position: { x: i * 200, y: i * 200 },
+        position: { x: i * 400 * Math.random() + 300, y: i * 300 },
         data: item,
       }
     })
@@ -46,10 +46,17 @@ const fetchFlowData = async () => {
       if (!item.dependentSchedule || !item.dependentSchedule.id) {
         return;
       }
+      // edges.value.push({
+      //   id: getTemplateId(),
+      //   source: item.id,
+      //   target: item.dependentSchedule.id,
+      //   markerEnd: 'arrowclosed',
+      // })
       edges.value.push({
         id: getTemplateId(),
-        source: item.id,
-        target: item.dependentSchedule.id,
+        /* 依赖的任务->任务  */
+        source: item.dependentSchedule.id,
+        target: item.id,
         markerEnd: 'arrowclosed',
       })
     })

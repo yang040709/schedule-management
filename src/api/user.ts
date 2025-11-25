@@ -1,5 +1,5 @@
 import request from '.'
-import type { LoginFrom, User, LoginResponse } from '@/types/user'
+import type { LoginFrom, User, LoginResponse, RefreshTokenResponse } from '@/types/user'
 
 export const loginApi = (data: LoginFrom) => {
   return request({
@@ -7,6 +7,13 @@ export const loginApi = (data: LoginFrom) => {
     method: 'post',
     data,
   }) as Promise<LoginResponse>
+}
+
+export const refreshTokenApi = () => {
+  return request({
+    url: '/auth/refresh',
+    method: 'get',
+  }) as Promise<RefreshTokenResponse>
 }
 
 export const registerApi = (data: LoginFrom) => {
@@ -22,4 +29,11 @@ export const getUserInfoApi = () => {
     url: '/auth/verify',
     method: 'get',
   }) as Promise<User>
+}
+
+export const logoutApi = () => {
+  return request({
+    url: '/auth/logout',
+    method: 'post',
+  }) as Promise<void>
 }

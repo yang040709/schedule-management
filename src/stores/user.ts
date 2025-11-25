@@ -3,8 +3,8 @@ import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 import type { LoginFrom, User } from '@/types/user'
-import { loginApi, registerApi, getUserInfoApi } from '@/api/user'
-
+import { loginApi, registerApi, getUserInfoApi, logoutApi } from '@/api/user'
+import { ACCESS_TOKEN_KEY } from '@/constant'
 export const useUserStore = defineStore('user', () => {
   const user = ref<User>({
     userId: '',
@@ -14,14 +14,16 @@ export const useUserStore = defineStore('user', () => {
   const isLogin: Ref<boolean> = computed(() => {
     return user.value.userId !== '' || user.value.username !== '' || user.value.role !== ''
   })
-  const token: Ref<string | undefined> = useLocalStorage('yang-customer-token', undefined)
+  /* 访问令牌 */
+  const accessToken: Ref<string | undefined> = useLocalStorage(ACCESS_TOKEN_KEY, undefined)
+  // const token: Ref<string | undefined> = useLocalStorage('yang-customer-token', undefined)
   const isTryGetUserInfo = ref(false)
   const loading = ref(false)
   const login = async (loginFrom: LoginFrom) => {
     try {
       loading.value = true
       const res = await loginApi(loginFrom)
-      token.value = res.token
+      accessToken.value = res.accessToken
       user.value.userId = res.userId
       user.value.username = res.username
       user.value.role = res.role
@@ -37,7 +39,7 @@ export const useUserStore = defineStore('user', () => {
     try {
       loading.value = true
       const res = await registerApi(registerFrom)
-      token.value = res.token
+      accessToken.value = res.accessToken
       user.value.userId = res.userId
       user.value.username = res.username
       user.value.role = res.role
@@ -67,15 +69,20 @@ export const useUserStore = defineStore('user', () => {
 
   const logout = async () => {
     loading.value = true
-    token.value = undefined
+    accessToken.value = undefined
     user.value.userId = ''
     user.value.username = ''
     user.value.role = ''
+    try {
+      await logoutApi()
+    } catch (error) {
+      console.log(error)
+    }
     loading.value = false
   }
   return {
     user,
-    token,
+    accessToken,
     isLogin,
     isTryGetUserInfo,
     login,
