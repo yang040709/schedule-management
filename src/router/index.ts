@@ -90,6 +90,15 @@ const router = createRouter({
             layout: 'full',
           },
         },
+        {
+          path: '/stat',
+          name: 'stat',
+          component: () => import('@/views/Stat.vue'),
+          meta: {
+            title: '统计',
+            layout: 'full',
+          },
+        },
       ],
     },
     {
