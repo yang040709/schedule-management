@@ -31,7 +31,7 @@ export const getUserInfoApi = () => {
     meta: {
       notToast: true,
     },
-  }) as Promise<User>
+  } as any) as Promise<User>
 }
 
 export const logoutApi = () => {

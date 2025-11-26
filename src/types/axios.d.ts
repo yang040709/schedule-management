@@ -2,10 +2,14 @@ import 'axios'
 
 declare module 'axios' {
   export interface AxiosRequestConfig {
-    meta?: Record<string, any> // 或更具体的类型
+    meta?: {
+      notToast?: boolean
+    }
   }
 
   export interface InternalAxiosRequestConfig {
-    meta?: Record<string, any>
+    meta?: {
+      notToast?: boolean
+    }
   }
 }

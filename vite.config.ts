@@ -28,7 +28,8 @@ const commonConfig = defineConfig({
 })
 
 const prodConfig = defineConfig({
-  base: '/schedule-management',
+  // base: '/schedule-management',
+  base: '/',
 })
 const devConfig = defineConfig({
   base: '/',
