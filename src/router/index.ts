@@ -4,6 +4,7 @@ import { getTodayDate } from '@/utils/date'
 import { setupRouteMeta } from '@/utils/meta'
 import { useUserStore } from '@/stores/user'
 import Layout from '@/Layout/Layout.vue'
+import { NO_LOGIN_CAN_ACCESS } from '@/constant'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -127,32 +128,27 @@ const router = createRouter({
   ],
 })
 
-const noLoginCanAccessRoutes = ['login', 'register']
-
 router.beforeEach(async (to, from, next) => {
+  const routeName = to.name?.toString()
   const userStore = useUserStore()
-  if (!userStore.isTryGetUserInfo) {
-    try {
-      await userStore.getUserInfo()
-    } catch (error) {
-      console.log('获取用户信息失败')
-    } finally {
-      userStore.isTryGetUserInfo = true
-    }
+  try {
+    await userStore.ensureUserInfo()
+  } catch (error) {
+    console.log('获取用户信息失败', error)
   }
   if (!userStore.isLogin) {
-    if (!to.name || !noLoginCanAccessRoutes.includes(to.name as string)) {
-      next({
-        name: 'login',
-      })
+    /* || !NO_LOGIN_CAN_ACCESS.includes(to.name as string) */
+    if (routeName && NO_LOGIN_CAN_ACCESS.includes(routeName)) {
+      next()
       return
     }
-    /* 否则则放行 */
-    next()
+    next({
+      name: 'login',
+    })
     return
   }
-  if (to.name && noLoginCanAccessRoutes.includes(to.name as string)) {
-    /* 
+  if (routeName && NO_LOGIN_CAN_ACCESS.includes(routeName)) {
+    /*
       如果用户已经登录，则跳转到首页，不能跳转到登录注册页
     */
     next({
@@ -164,10 +160,6 @@ router.beforeEach(async (to, from, next) => {
 })
 router.afterEach((to, from) => {
   setupRouteMeta(to, from)
-  // const appStore = useAppStore()
-  // if (to.meta.title) {
-  //   appStore.setTitle(to.meta.title)
-  // }
 })
 
 export default router

@@ -28,6 +28,9 @@ export const getUserInfoApi = () => {
   return request({
     url: '/auth/verify',
     method: 'get',
+    meta: {
+      notToast: true,
+    },
   }) as Promise<User>
 }
 

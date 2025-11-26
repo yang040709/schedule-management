@@ -10,10 +10,8 @@ const todayLabel = getTodayDate()
 </script>
 
 <template>
-  <header
-    :style="{ height: APP_CONFIG.HeaderHeight }"
-    class="sticky top-0 z-40 w-full backdrop-blur bg-white/70 border-b border-gray-100"
-  >
+  <header :style="{ height: APP_CONFIG.HeaderHeight }"
+    class="fixed top-0 z-40 w-full backdrop-blur bg-white/70 border-b border-gray-100">
     <div class="mx-auto max-w-[1200px] px-4">
       <div class="flex h-14 items-center justify-between">
         <RouterLink to="/" class="flex items-center gap-2">
@@ -22,20 +20,12 @@ const todayLabel = getTodayDate()
         </RouterLink>
 
         <!-- 导航栏的位置，以后如果添加导航栏，可以放在这里 -->
-        <nav
-          class="hidden sm:flex items-center gap-1 rounded-xl p-1 bg-gray-50 border border-gray-100"
-        >
-          <RouterLink
-            v-for="item in navList"
-            :key="item.route.name"
-            :to="item.route"
-            class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
-            :class="
-              isActive(item.route.name)
+        <nav class="hidden sm:flex items-center gap-1 rounded-xl p-1 bg-gray-50 border border-gray-100">
+          <RouterLink v-for="item in navList" :key="item.route.name" :to="item.route"
+            class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors" :class="isActive(item.route.name)
                 ? 'bg-white text-gray-900 shadow-sm border border-gray-200'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-white'
-            "
-          >
+              ">
             {{ item.text }}
           </RouterLink>
         </nav>
@@ -47,16 +37,13 @@ const todayLabel = getTodayDate()
               $router.push({
                 name: 'todayCalendar',
               })
-            "
-          >
+              ">
             {{ todayLabel }}
           </span>
           <!-- <Button @click="modelStore.addModelOpen = true">新增日程</Button> -->
           <Avatar v-if="userStore.isLogin" />
           <span v-else-if="userStore.isLogin">正在加载中...</span>
-          <RouterLink v-else class="text-gray-600 hover:text-blue-500 transition-colors" to="/login"
-            >未登录</RouterLink
-          >
+          <RouterLink v-else class="text-gray-600 hover:text-blue-500 transition-colors" to="/login">未登录</RouterLink>
         </div>
       </div>
     </div>

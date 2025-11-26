@@ -13,7 +13,7 @@ import { useFetchData } from '@/hooks/useFetchData'
 import { getTodayDate } from '@/utils/date'
 import eventBus from '@/utils/eventBus'
 import { useScheduleList } from '@/hooks/useScheduleList'
-import PastWeekSchedule from './PastWeekSchedule.vue'
+
 
 const router = useRouter()
 const route = useRoute()
@@ -298,10 +298,7 @@ const setPriority = (priority: PriorityLevel) => {
           @generate-ai-suggest="generateAISuggest" @remove-ai-suggest="removeAISuggest" @cancel="handleCancel" />
       </div>
     </div>
-    <div class="h-[60px]">
 
-    </div>
-    <PastWeekSchedule :date="date" />
   </div>
 </template>
 

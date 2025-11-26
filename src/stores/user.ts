@@ -19,6 +19,8 @@ export const useUserStore = defineStore('user', () => {
   // const token: Ref<string | undefined> = useLocalStorage('yang-customer-token', undefined)
   const isTryGetUserInfo = ref(false)
   const loading = ref(false)
+  let userInfoPromise: Promise<User> | null = null
+
   const login = async (loginFrom: LoginFrom) => {
     try {
       loading.value = true
@@ -67,6 +69,20 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const ensureUserInfo = async () => {
+    if (isTryGetUserInfo.value) {
+      return
+    }
+    if (userInfoPromise) {
+      return userInfoPromise
+    }
+    userInfoPromise = getUserInfo().finally(() => {
+      isTryGetUserInfo.value = true
+      userInfoPromise = null
+    })
+    return userInfoPromise
+  }
+
   const logout = async () => {
     loading.value = true
     accessToken.value = undefined
@@ -89,5 +105,6 @@ export const useUserStore = defineStore('user', () => {
     register,
     getUserInfo,
     logout,
+    ensureUserInfo,
   }
 })

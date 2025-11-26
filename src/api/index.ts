@@ -68,14 +68,20 @@ request.interceptors.response.use(
         failedRequestQueue.forEach((item) => item.reject(error))
         failedRequestQueue = []
         userStore.logout()
-        window.location.href = import.meta.env.VITE_BASE_URL + '/login'
+        console.log(import.meta.env, '<===env')
+        // if (import.meta.env.BASE_URL) {
+        //   window.location.pathname = import.meta.env.BASE_URL + 'login'
+        // } else {
+        //   window.location.pathname = '/login'
+        // }
         return Promise.reject(error)
       } finally {
         isRefreshing = false
       }
     }
     // toast.error(response.data.message)
-    console.error(response.data.message)
+    // console.log(response, '<===')
+    // console.error(response.data.message)
     return Promise.reject(response.data.message)
   },
   (error) => {

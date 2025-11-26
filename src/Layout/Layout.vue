@@ -9,7 +9,7 @@ import FooterNav from './FooterNav.vue'
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-gray-50">
+  <div class="min-h-screen flex flex-col bg-gray-50 mt-[56px]">
     <Header />
     <ScheduleDetail />
     <AddSchedule />
