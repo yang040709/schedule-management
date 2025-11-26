@@ -20,7 +20,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: yang0709/yang-docker-demo:latest
+          tags: yang0709/schedule-management-frontend:latest
       - name: Deploy to Remote Server
         uses: appleboy/ssh-action@v1.0.2
         with:
@@ -30,12 +30,12 @@ jobs:
           port: ${{ secrets.SERVER_PORT }} # SSH 端口，通常是 22
           script: |
             sudo docker --version 
-            if [ "$(sudo docker ps -a | grep yang-docker-app)" ]; then
-              sudo docker rm -f yang-docker-app
+            if [ "$(sudo docker ps -a | grep schedule-frontend-app)" ]; then
+              sudo docker rm -f schedule-frontend-app
             fi
-            sudo docker pull yang0709/yang-docker-demo:latest
+            sudo docker pull yang0709/schedule-management-frontend:latest
             sudo docker run -d \
               --add-host=host.docker.internal:host-gateway \
               -p 80:80 \
-              --name yang-docker-app \
-              yang0709/yang-docker-demo:latest
+              --name schedule-frontend-app \
+              yang0709/schedule-management-frontend:latest
