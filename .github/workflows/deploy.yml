@@ -34,4 +34,8 @@ jobs:
               sudo docker rm -f yang-docker-app
             fi
             sudo docker pull yang0709/yang-docker-demo:latest
-            sudo docker run -d -p 80:80 --name 'yang-docker-app' yang0709/yang-docker-demo:latest
+            sudo docker run -d \
+              --add-host=host.docker.internal:host-gateway \ 
+              -p 80:80 \
+              --name yang-docker-app \
+              yang0709/yang-docker-demo:latest
