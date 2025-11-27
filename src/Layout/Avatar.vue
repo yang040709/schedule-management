@@ -32,7 +32,7 @@ const navToSetting = () => {
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
-      <FallbackImage src="/avatar.png" class="w-10 h-10 rounded-full" alt="avatar" />
+      <FallbackImage src="/avatar.png" class="w-10 h-10 rounded-full mr-8" alt="avatar" />
     </DropdownMenuTrigger>
     <DropdownMenuContent class="w-56">
       <DropdownMenuItem @click="navToSetting">

@@ -13,12 +13,11 @@ const date = computed(() => route.params.date?.toString() || getTodayDate())
 
 <template>
   <div class="md:flex md:gap-8 w-1/1">
-    <div>
-      <ScheduleList class="flex-2" />
-      <div class="h-[60px]"></div>
-      <PastWeekSchedule :date="date" />
+    <div class="flex flex-1 flex-col gap-[60px]">
+      <ScheduleList class="flex-1" />
+      <PastWeekSchedule :date="date" class="flex-1" />
     </div>
-    <div class="justify-center items-start space-y-5 mx-auto mt-10 md:mt-0 md:block md:w-[280px]">
+    <div class="justify-center items-start space-y-5 mt-10 md:mt-0 md:block md:w-[280px]">
       <AppCalendar />
       <IntelligentTaskInput />
     </div>

@@ -20,3 +20,48 @@ html {
   overflow-x: hidden;
   scroll-behavior: smooth;
 }
+
+body {
+  padding-right: 0px !important;
+}
+
+/* 页面状态切换过渡 - 确保新旧元素不同时出现 */
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-fade-enter-from {
+  opacity: 0;
+  /* transform: translateY(20px); */
+}
+
+.page-fade-leave-to {
+  opacity: 0;
+  /* transform: translateY(-20px); */
+}
+
+/* 列表项过渡 */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.list-move {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.list-enter-from {
+  opacity: 0;
+  transform: translateY(30px) scale(0.9);
+}
+
+.list-leave-to {
+  opacity: 0;
+  transform: translateY(-30px) scale(0.9);
+}
+
+.list-leave-active {
+  position: absolute;
+  width: 100%;
+}

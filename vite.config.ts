@@ -58,9 +58,6 @@ const commonConfig = defineConfig({
       },
     },
   },
-  esbuild: {
-    drop: ['console', 'debugger'],
-  },
   build: {
     minify: true,
     rollupOptions: {
@@ -121,6 +118,9 @@ const commonConfig = defineConfig({
 const prodConfig = defineConfig({
   // base: '/schedule-management',
   base: '/',
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
 })
 const devConfig = defineConfig({
   base: '/',

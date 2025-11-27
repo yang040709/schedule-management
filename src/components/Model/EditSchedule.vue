@@ -6,7 +6,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { useAddModelStore } from '@/stores/addModel'
 import { storeToRefs } from 'pinia'
 import { Button } from '@/components/ui/button'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -15,17 +14,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { X, WandSparkles } from 'lucide-vue-next'
 import { CalendarDate, getLocalTimeZone, today } from '@internationalized/date'
 import { CalendarIcon } from 'lucide-vue-next'
-import { toDate } from 'reka-ui/date'
 import { cn } from '@/lib/utils'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import TagItem from '@/components/Tag/TagItem.vue'
-import type { ScheduleForm, ScheduleResponse } from '@/types/schedule'
-import { useRouter, useRoute } from 'vue-router'
-import { toast } from 'vue-sonner'
-import { getTodayDate } from '@/utils/date'
-import { useScheduleFrom } from '@/hooks/useScheduleFrom'
+import type { ScheduleResponse } from '@/types/schedule'
 import Tags from '@/components/Tag/Tags.vue'
 import { useTagStore } from '@/stores/tag'
 import { watch, ref, computed } from 'vue'
@@ -102,7 +95,7 @@ const {
   values,
   setFieldValue,
   placeholder,
-  singleDate,
+  date,
   df,
   categoryInput,
   addCategory,
@@ -125,9 +118,7 @@ const generateAISuggestion = async () => {
 </script>
 <template>
   <Dialog v-model:open="editModelOpen">
-    <DialogContent
-      class="sm:max-w-[425px] md:max-w-[600px] lg:max-w-[800px] h-[90vh] overflow-hidden"
-    >
+    <DialogContent class="sm:max-w-[425px] md:max-w-[600px] lg:max-w-[800px] h-[90vh] overflow-hidden">
       <DialogHeader>
         <DialogTitle>修改日程</DialogTitle>
         <DialogDescription> 修改您的日程 </DialogDescription>
@@ -138,12 +129,8 @@ const generateAISuggestion = async () => {
             <FormItem class="space-y-2">
               <FormLabel class="text-base font-medium">标题</FormLabel>
               <FormControl>
-                <Input
-                  type="text"
-                  placeholder="请输入日程标题"
-                  v-bind="componentField"
-                  class="h-11 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
-                />
+                <Input type="text" placeholder="请输入日程标题" v-bind="componentField"
+                  class="h-11 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all" />
               </FormControl>
               <FormMessage class="text-sm" />
             </FormItem>
@@ -152,25 +139,11 @@ const generateAISuggestion = async () => {
             <FormItem class="space-y-2">
               <FormLabel class="text-base font-medium">
                 描述
-                <!-- <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Button variant="outline">
-                        <WandSparkles />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>点击使用大模型生成描述</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider> -->
               </FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="请输入描述信息"
+                <Textarea placeholder="请输入描述信息"
                   class="min-h-[100px] rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all resize-y"
-                  v-bind="componentField"
-                />
+                  v-bind="componentField" />
               </FormControl>
               <FormMessage class="text-sm" />
             </FormItem>
@@ -193,11 +166,9 @@ const generateAISuggestion = async () => {
                 </TooltipProvider>
               </FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="修改行动建议"
+                <Textarea placeholder="修改行动建议"
                   class="min-h-[100px] rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all resize-y"
-                  v-bind="componentField"
-                />
+                  v-bind="componentField" />
               </FormControl>
               <FormMessage class="text-sm" />
             </FormItem>
@@ -208,39 +179,28 @@ const generateAISuggestion = async () => {
               <Popover>
                 <PopoverTrigger as-child>
                   <FormControl>
-                    <Button
-                      variant="outline"
-                      :class="
-                        cn(
-                          'w-full h-11 justify-between ps-4 font-medium border-gray-300 hover:border-blue-500 transition-all',
-                          !singleDate && 'text-muted-foreground',
-                        )
-                      "
-                    >
-                      <span>{{ singleDate ? df.format(toDate(singleDate)) : '选择日期' }}</span>
+                    <Button variant="outline" :class="cn(
+                      'w-full h-11 justify-between ps-4 font-medium border-gray-300 hover:border-blue-500 transition-all',
+                      !date && 'text-muted-foreground')">
+                      <span>{{ date || '选择日期' }}</span>
                       <CalendarIcon class="ms-2 h-5 w-5 opacity-70" />
                     </Button>
                     <input hidden />
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent class="w-auto p-0 rounded-lg shadow-lg border-0">
-                  <Calendar
-                    v-model:placeholder="placeholder"
-                    :model-value="singleDate"
-                    calendar-label="选择日期"
-                    initial-focus
-                    :min-value="new CalendarDate(2000, 1, 1)"
-                    :max-value="new CalendarDate(2050, 1, 1)"
+                  <Calendar v-model:placeholder="placeholder" :model-value="date" calendar-label="选择日期" initial-focus
+                    :min-value="new CalendarDate(2000, 1, 1)" :max-value="new CalendarDate(2050, 1, 1)"
                     @update:model-value="
                       (v) => {
                         if (v) {
-                          setFieldValue('date', v.toString())
+                          setFieldValue('date', v.toString().substring(0, 10))
                         } else {
                           setFieldValue('date', today(getLocalTimeZone()).toString())
                         }
                       }
-                    "
-                  />
+                    " />
+                  <p>hello</p>
                 </PopoverContent>
               </Popover>
               <FormMessage class="text-sm" />
@@ -250,11 +210,8 @@ const generateAISuggestion = async () => {
             <FormItem class="space-y-2">
               <FormLabel class="text-base font-medium">开始时间（可选）</FormLabel>
               <FormControl>
-                <Input
-                  type="time"
-                  v-bind="componentField"
-                  class="w-full h-11 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
-                />
+                <Input type="time" v-bind="componentField"
+                  class="w-full h-11 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all" />
               </FormControl>
               <FormMessage class="text-sm" />
             </FormItem>
@@ -263,11 +220,8 @@ const generateAISuggestion = async () => {
             <FormItem class="space-y-2">
               <FormLabel class="text-base font-medium">结束时间（可选）</FormLabel>
               <FormControl>
-                <Input
-                  type="time"
-                  v-bind="componentField"
-                  class="w-full h-11 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
-                />
+                <Input type="time" v-bind="componentField"
+                  class="w-full h-11 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all" />
               </FormControl>
               <FormMessage class="text-sm" />
             </FormItem>
@@ -278,24 +232,21 @@ const generateAISuggestion = async () => {
               <FormControl>
                 <RadioGroup class="flex flex-col space-y-1" v-bind="componentField">
                   <FormItem
-                    class="flex items-center space-y-0 gap-x-3 p-2 px-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                  >
+                    class="flex items-center space-y-0 gap-x-3 p-2 px-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                     <FormControl>
                       <RadioGroupItem value="high" class="text-red-500 border-gray-300" />
                     </FormControl>
                     <FormLabel class="font-medium cursor-pointer">高优先级</FormLabel>
                   </FormItem>
                   <FormItem
-                    class="flex items-center space-y-0 gap-x-3 p-2 px-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                  >
+                    class="flex items-center space-y-0 gap-x-3 p-2 px-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                     <FormControl>
                       <RadioGroupItem value="medium" class="text-yellow-500 border-gray-300" />
                     </FormControl>
                     <FormLabel class="font-medium cursor-pointer">中优先级</FormLabel>
                   </FormItem>
                   <FormItem
-                    class="flex items-center space-y-0 gap-x-3 p-2 px-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                  >
+                    class="flex items-center space-y-0 gap-x-3 p-2 px-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                     <FormControl>
                       <RadioGroupItem value="low" class="text-green-500 border-gray-300" />
                     </FormControl>
@@ -310,12 +261,8 @@ const generateAISuggestion = async () => {
             <FormItem class="space-y-2">
               <FormLabel class="text-base font-medium">依赖日程ID（可选）</FormLabel>
               <FormControl>
-                <Input
-                  type="text"
-                  placeholder="请输入依赖日程ID"
-                  v-bind="componentField"
-                  class="h-11 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
-                />
+                <Input type="text" placeholder="请输入依赖日程ID" v-bind="componentField"
+                  class="h-11 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all" />
               </FormControl>
               <FormMessage class="text-sm" />
             </FormItem>
@@ -333,11 +280,8 @@ const generateAISuggestion = async () => {
                   <Tags :tags="tagStore.tags" @click="addCategoryByClickTag" />
                 </div>
                 <div class="flex flex-wrap gap-1">
-                  <span
-                    v-for="(item, index) in componentField.modelValue"
-                    :key="index"
-                    class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full flex items-center gap-1"
-                  >
+                  <span v-for="(item, index) in componentField.modelValue" :key="index"
+                    class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full flex items-center gap-1">
                     {{ item }}
                     <button @click="removeCategory(item)" class="text-gray-400 hover:text-red-500">
                       <X class="w-4" />
@@ -349,11 +293,8 @@ const generateAISuggestion = async () => {
             </FormItem>
           </FormField>
           <div class="pt-4">
-            <Button
-              :disabled="loading"
-              type="submit"
-              class="w-full h-12 text-white font-medium rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-            >
+            <Button :disabled="loading" type="submit"
+              class="w-full h-12 text-white font-medium rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]">
               <template v-if="!loading"> 修改 </template>
               <template v-else> 修改中... </template>
             </Button>

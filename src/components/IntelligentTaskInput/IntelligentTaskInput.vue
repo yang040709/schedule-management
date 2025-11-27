@@ -122,7 +122,6 @@ const handleSubmit = async () => {
           </div>
           <div v-if="data.category?.length">
             <span class="text-gray-600">类别：</span>
-
             <span class="font-medium mr-2" v-for="category in data.category">{{ category }}</span>
           </div>
         </div>

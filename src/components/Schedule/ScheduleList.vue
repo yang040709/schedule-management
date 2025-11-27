@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ScheduleItem from './ScheduleItem.vue'
-import { computed, watch } from 'vue'
+import { computed, TransitionGroup, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Button } from '../ui/button'
 import type { PriorityLevel, Schedule, ScheduleStatus } from '@/types/schedule'
@@ -13,16 +13,19 @@ import { useFetchData } from '@/hooks/useFetchData'
 import { getTodayDate } from '@/utils/date'
 import eventBus from '@/utils/eventBus'
 import { useScheduleList } from '@/hooks/useScheduleList'
+import Skeleton from '../Skeleton/Skeleton.vue'
 
 
 const router = useRouter()
 const route = useRoute()
 
 
+/* 
+  如果模态窗有事件，就重新获取数据
+*/
 eventBus.on('add-schedule', () => {
   fetchData()
 })
-
 eventBus.on('edit-schedule', () => {
   fetchData()
 })
@@ -49,7 +52,7 @@ const makeQuery: () => ScheduleListQuery = () => {
   return {
     status,
     priority,
-    date: route.params.date?.toString() || getTodayDate(),
+    date: route.params.date?.toString().substring(0, 10) || getTodayDate(),
   }
 }
 
@@ -138,7 +141,7 @@ const showAllSchedule = () => {
     params: route.params,
     query: {
       ...route.query,
-      completed: undefined,
+      status: undefined,
     },
   })
 }
@@ -202,7 +205,7 @@ const setPriority = (priority: PriorityLevel) => {
 </script>
 
 <template>
-  <div class="w-full max-w-[800px]">
+  <div class="w-full">
     <div class="mb-6 rounded-2xl border bg-white shadow-sm ring-1 ring-gray-100">
       <div class="flex flex-col gap-3 p-5 sm:p-6">
         <div class="flex items-center justify-between">
@@ -222,18 +225,16 @@ const setPriority = (priority: PriorityLevel) => {
           <span class="text-gray-500 w-12">概况</span>
           <span
             class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 cursor-pointer hover:bg-gray-200 transition-colors"
-            @click="showAllSchedule" :class="!route.query.completed ? 'outline-1 outline-gray-300 bg-gray-200' : ''">共
+            @click="showAllSchedule" :class="!route.query.status ? 'outline-1 outline-gray-300 bg-gray-200' : ''">共
             {{ totalCount }} 个</span>
           <span
             class="inline-flex items-center rounded-md bg-green-100 text-green-700 px-2 py-1 cursor-pointer hover:bg-green-200 transition-colors"
-            @click="showCompletedSchedule" :class="route.query.completed === 'true' ? 'outline-1 outline-green-300 bg-green-200' : ''
+            @click="showCompletedSchedule" :class="route.query.status === 'done' ? 'outline-1 outline-green-300 bg-green-200' : ''
               ">已完成 {{ completedCount }}</span>
           <span
             class="inline-flex items-center rounded-md bg-yellow-100 text-yellow-800 px-2 py-1 cursor-pointer hover:bg-yellow-200 transition-colors"
-            @click="showUncompletedSchedule" :class="route.query.completed === 'false' ? 'outline-1 outline-yellow-300 bg-yellow-200' : ''
+            @click="showUncompletedSchedule" :class="route.query.status === 'pending' ? 'outline-1 outline-yellow-300 bg-yellow-200' : ''
               ">未完成 {{ totalCount - completedCount }}</span>
-          <!-- priority filters -->
-          <!-- <span class="mx-1 h-4 w-px bg-gray-200"></span> -->
         </div>
         <div class="flex flex-wrap items-center gap-2 text-sm text-gray-600">
           <span class="text-gray-500 w-12">优先级</span>
@@ -254,52 +255,61 @@ const setPriority = (priority: PriorityLevel) => {
             @click="setPriority('low')" :class="route.query.priority === 'low' ? 'outline-1 outline-emerald-300 bg-emerald-200' : ''
               ">低</span>
         </div>
-        <!-- <div class="pt-2">
-          <TagList />
-        </div> -->
       </div>
     </div>
-
-    <div v-if="totalCount === 0" class="rounded-2xl bg-white py-14 border text-center shadow-sm ring-1 ring-gray-100">
-      <div class="mx-auto w-full max-w-sm px-6">
-        <h3 class="text-lg font-semibold text-gray-900">今天还没有日程</h3>
-        <p class="mt-2 text-sm text-gray-600">
-          为 {{ route.params.date }} 添加你的第一个日程，开始高效的一天。
-        </p>
-        <div class="mt-6">
-          <button type="button"
-            class="inline-flex w-full justify-center rounded-lg bg-black px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-gray-900 active:bg-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
-            @click="handleAddNew">
-            新增日程
-          </button>
+    <!-- <Transition name="page-fade" mode="out-in"> -->
+    <!-- <div v-if="loading && data.data.length === 0">
+      <Skeleton :count="5" height="h-8" />
+    </div> -->
+    <div v-if="data.data.length === 0">
+      <div v-if="totalCount === 0" key="empty"
+        class="rounded-2xl bg-white py-14 border text-center shadow-sm ring-1 ring-gray-100">
+        <div class="mx-auto w-full max-w-sm px-6">
+          <h3 class="text-lg font-semibold text-gray-900">今天还没有日程</h3>
+          <p class="mt-2 text-sm text-gray-600">
+            为 {{ route.params.date }} 添加你的第一个日程，开始高效的一天。
+          </p>
+          <div class="mt-6">
+            <button type="button"
+              class="inline-flex w-full justify-center rounded-lg bg-black px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-gray-900 active:bg-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+              @click="handleAddNew">
+              新增日程
+            </button>
+          </div>
+        </div>
+      </div>
+      <div v-else key="filtered-empty"
+        class="rounded-2xl bg-white border py-14 text-center shadow-sm ring-1 ring-gray-100">
+        <div class="mx-auto w-full max-w-sm px-6">
+          <h3 class="text-lg font-semibold text-gray-900">当前筛选条件还没有日程</h3>
+          <p class="mt-2 text-sm text-gray-600">
+            为 {{ route.params.date }} 添加你的日程，开始高效的一天。
+          </p>
+          <div class="mt-6">
+            <button type="button"
+              class="inline-flex w-full justify-center rounded-lg bg-black px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-gray-900 active:bg-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+              @click="handleAddNew">
+              新增日程
+            </button>
+          </div>
         </div>
       </div>
     </div>
-    <div v-else-if="totalCount !== 0 && data.data.length === 0"
-      class="rounded-2xl bg-white border py-14 text-center shadow-sm ring-1 ring-gray-100">
-      <div class="mx-auto w-full max-w-sm px-6">
-        <h3 class="text-lg font-semibold text-gray-900">当前筛选条件还没有日程</h3>
-        <p class="mt-2 text-sm text-gray-600">
-          为 {{ route.params.date }} 添加你的日程，开始高效的一天。
-        </p>
-        <div class="mt-6">
-          <button type="button"
-            class="inline-flex w-full justify-center rounded-lg bg-black px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-gray-900 active:bg-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
-            @click="handleAddNew">
-            新增日程
-          </button>
+    <div v-else key="schedule-list" class="rounded-2xl bg-white shadow-sm border ring-1 ring-gray-100">
+      <TransitionGroup name="list" tag="div">
+        <div class="p-4 sm:p-5" v-for="ev in data.data" :key="ev.id">
+          <ScheduleItem :item="ev" @toggle-complete="handleToggleComplete" @edit="handleEdit" @delete="handleDelete"
+            @generate-ai-suggest="generateAISuggest" @remove-ai-suggest="removeAISuggest" @cancel="handleCancel" />
         </div>
-      </div>
+      </TransitionGroup>
     </div>
-    <div v-else class="rounded-2xl bg-white shadow-sm border ring-1 ring-gray-100">
-      <!-- <div class="divide-y divide-gray-100"> -->
-      <div class="p-4 sm:p-5" v-for="ev in data.data" :key="ev.id">
-        <ScheduleItem :item="ev" @toggle-complete="handleToggleComplete" @edit="handleEdit" @delete="handleDelete"
-          @generate-ai-suggest="generateAISuggest" @remove-ai-suggest="removeAISuggest" @cancel="handleCancel" />
-      </div>
-    </div>
-
+    <!-- </Transition> -->
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+/* 确保容器有相对定位，为绝对定位的子元素提供参考 */
+.rounded-2xl {
+  position: relative;
+}
+</style>

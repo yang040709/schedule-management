@@ -27,7 +27,6 @@ let failedRequestQueue: { resolve: (token: string) => void; reject: (error: any)
 
 request.interceptors.response.use(
   async (response) => {
-    logResponse(response, false)
     if (response.data.code === 0) {
       return response.data.data
     }

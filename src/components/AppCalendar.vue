@@ -14,7 +14,7 @@ const handleUpdate = (date: any) => {
   router.push({
     name: 'calendar',
     params: {
-      date: date.toString(),
+      date: date.toString().substring(0, 10)
     },
   })
 }
@@ -26,12 +26,7 @@ const modelValue = computed(() => {
 
 <template>
   <div id="app-calendar">
-    <!-- v-model="modelValue" -->
-    <Calendar
-      :model-value="modelValue"
-      @update:model-value="handleUpdate"
-      :weekday-format="'short'"
-      class="bg-white rounded-md border shadow-sm"
-    />
+    <Calendar :model-value="modelValue" @update:model-value="handleUpdate" :weekday-format="'short'"
+      class="bg-white rounded-md border shadow-sm" />
   </div>
 </template>

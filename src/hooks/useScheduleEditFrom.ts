@@ -16,8 +16,6 @@ import { useTagStore } from '@/stores/tag'
 
 import type { ModifyScheduleFormWithId, ScheduleForm } from '@/types/schedule'
 import { toast } from 'vue-sonner'
-import { getTodayDate } from '@/utils/date'
-import type { ModifyScheduleForm } from '@/types/schedule'
 // interface
 
 export const useScheduleEditFrom = (submitFunc: () => void) => {
@@ -38,9 +36,10 @@ export const useScheduleEditFrom = (submitFunc: () => void) => {
         })
         .optional(),
       // 公共字段
-      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
-        message: '日期格式应为 YYYY-MM-DD',
-      }),
+      // date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+      //   message: '日期格式应为 YYYY-MM-DD',
+      // }),
+      date: z.string('日期格式应为 YYYY-MM-DD'),
     }),
   )
 
@@ -55,12 +54,19 @@ export const useScheduleEditFrom = (submitFunc: () => void) => {
   })
 
   // watch()
-
-  const singleDate = computed({
+  const date = computed({
     get: () => {
-      return values.date ? parseDate(values.date) : undefined
+      try {
+        const date = values.date ? parseDate(values.date.substring(0, 10)) : undefined
+        return date
+      } catch (error) {
+        console.log(error)
+        return undefined
+      }
     },
-    set: (val) => val,
+    set: (val) => {
+      return val
+    },
   })
 
   // const singleDate=ref(getTodayDate());
@@ -128,7 +134,7 @@ export const useScheduleEditFrom = (submitFunc: () => void) => {
     setFieldValue,
     formSchema,
     placeholder,
-    singleDate,
+    date,
     df,
     categoryInput,
     addCategory,

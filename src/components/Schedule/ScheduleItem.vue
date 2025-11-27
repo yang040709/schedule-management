@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Schedule, ScheduleStatus } from '@/types/schedule'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Lock, Ban } from 'lucide-vue-next'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import { getTodayDate } from '@/utils/date'
 import { useDetailModelStore } from '@/stores/detailModel'
 import Dialog from '../components/Dialog.vue'
 import { useRouter } from 'vue-router'
+import Skeleton from '../Skeleton/Skeleton.vue'
 const router = useRouter()
 
 const props = defineProps<{ item: Schedule }>()
@@ -20,7 +21,7 @@ const emit = defineEmits<{
   (e: 'click', id: string): void
   (e: 'edit', id: string): void
   (e: 'delete', id: string): void
-  (e: 'generate-ai-suggest', id: string): void
+  (e: 'generate-ai-suggest', id: string, cb: () => void): void
   (e: 'remove-ai-suggest', id: string): void
   (e: 'cancel', id: string): void
 }>()
@@ -103,8 +104,13 @@ const statusMap: StatusMap = {
   },
 }
 
+
+const suggestLoading = ref(false)
 const generateAISuggest = async () => {
-  emit('generate-ai-suggest', props.item.id)
+  emit('generate-ai-suggest', props.item.id, () => {
+    suggestLoading.value = false
+  })
+  suggestLoading.value = true
 }
 
 const removeAISuggest = () => {
@@ -112,8 +118,6 @@ const removeAISuggest = () => {
 }
 
 const showDetail = () => {
-  console.log('showDetail')
-
   detailModelStore.schedule = props.item
   detailModelStore.isOpen = true
 }
@@ -123,15 +127,6 @@ const hasUncompletedDependency = computed(() => {
   return props.item.status === 'locked' || props.item.status === 'canceled'
 })
 
-// const containerClass = computed(() => {
-//   // return ''
-//   if (props.item.status === 'canceled') {
-//     return 'bg-red-100'
-//   }
-//   if (props.item.status === 'locked') {
-//     return 'bg-gray-50'
-//   }
-// })
 const showInFlow = () => {
   router.push({
     name: 'flow',
@@ -140,6 +135,10 @@ const showInFlow = () => {
     },
   })
 }
+
+
+
+
 </script>
 
 <template>
@@ -288,26 +287,16 @@ const showInFlow = () => {
             </div>
           </div>
         </div>
-        <!-- <div class="mt-2 flex gap-x-2">
-        <span class="px-3 py-1 text-xs font-bold bg-lime-100 text-lime-600" v-if="item.timeOfDay">
-          {{ item.timeOfDay?.startTime }} - {{ item.timeOfDay?.endTime }}
-        </span>
-        <span
-          v-if="item.scheduleType === 'single'"
-          class="px-3 py-1 text-xs font-bold bg-cyan-100 text-cyan-600"
-        >
-          {{ item.singleDate }}
-        </span>
-        <span
-          v-if="item.scheduleType === 'daily'"
-          class="px-3 py-1 text-xs font-bold bg-cyan-100 text-cyan-600"
-        >
-          11/20 - 12/1
-        </span>
-      </div> -->
-        <div class="mt-4 text-xs text-slate-500 bg-slate-100 p-2 rounded-md" v-if="item.AIsuggestion">
-          <span class="font-medium">行动建议：</span>
-          {{ item.AIsuggestion }}
+        <div class="mt-4 text-xs text-slate-500 bg-slate-100 p-2 rounded-md" v-if="item.AIsuggestion || suggestLoading">
+          <div v-if="suggestLoading">
+            <span class="font-medium">行动建议加载中...</span>
+            <Skeleton class="w-full h-4" />
+            <Skeleton class="w-full h-4 mt-1" />
+          </div>
+          <div v-else-if="item.AIsuggestion">
+            <span class="font-medium">行动建议：</span>
+            {{ item.AIsuggestion }}
+          </div>
         </div>
         <div class="mt-4 flex gap-2 flex-wrap">
           <button class="px-3 py-1 bg-gray-200 text-gray-800 rounded text-sm hover:bg-gray-300 transition-colors"
@@ -318,7 +307,8 @@ const showInFlow = () => {
             @click="showDetail">
             详情
           </button>
-          <button class="px-3 py-1 bg-[#3B82F6] text-white rounded text-sm hover:bg-[#3B82F6]/90 transition-colors"
+          <button
+            class="px-3 py-1 bg-[#3B82F6] text-white rounded text-sm hover:bg-[#3B82F6]/90 transition-colors hidden md:block"
             @click="showInFlow">
             流程图
           </button>

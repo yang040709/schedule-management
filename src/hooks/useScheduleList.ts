@@ -278,7 +278,7 @@ export const useScheduleList = (
   /* 
   处理生成AI建议事件，就是生成行动建议
 */
-  const generateAISuggest = async (id: string) => {
+  const generateAISuggest = async (id: string, cb: () => void) => {
     const item = data.value.data.find((e) => e.id === id)
     if (!item) {
       console.error('未找到该日程')
@@ -299,8 +299,13 @@ export const useScheduleList = (
         schedule: getScheduleInitialData(),
       },
     )
-    await fetchSuggestion()
-    await modifySchedule()
+    try {
+      await fetchSuggestion()
+      await modifySchedule()
+    } catch (error) {
+    } finally {
+      cb()
+    }
     // await fetchData()
     item.AIsuggestion = suggest.value.suggestion
   }

@@ -23,8 +23,8 @@ const todayLabel = getTodayDate()
         <nav class="hidden sm:flex items-center gap-1 rounded-xl p-1 bg-gray-50 border border-gray-100">
           <RouterLink v-for="item in navList" :key="item.route.name" :to="item.route"
             class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors" :class="isActive(item.route.name)
-                ? 'bg-white text-gray-900 shadow-sm border border-gray-200'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+              ? 'bg-white text-gray-900 shadow-sm border border-gray-200'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-white'
               ">
             {{ item.text }}
           </RouterLink>
@@ -40,7 +40,6 @@ const todayLabel = getTodayDate()
               ">
             {{ todayLabel }}
           </span>
-          <!-- <Button @click="modelStore.addModelOpen = true">新增日程</Button> -->
           <Avatar v-if="userStore.isLogin" />
           <span v-else-if="userStore.isLogin">正在加载中...</span>
           <RouterLink v-else class="text-gray-600 hover:text-blue-500 transition-colors" to="/login">未登录</RouterLink>

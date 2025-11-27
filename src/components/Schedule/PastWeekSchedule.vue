@@ -1,22 +1,16 @@
 <script setup lang='ts'>
-import ScheduleItem from './ScheduleItem.vue';
-import { useScheduleList } from '@/hooks/useScheduleList';
 import { useFetchData } from '@/hooks/useFetchData';
 import type { ScheduleListQuery, ScheduleListResponse } from '@/types/schedule';
 import { ref, watch } from 'vue';
 import { getTodayDate } from '@/utils/date';
 import dayjs from 'dayjs';
 import SampleScheduleItem from './SampleScheduleItem.vue';
-import { Sailboat } from 'lucide-vue-next';
 import { getScheduleListApi } from '@/api/schedule';
 
 interface PastWeekScheduleProps {
   date?: string
 }
-
 const { date = getTodayDate() } = defineProps<PastWeekScheduleProps>()
-
-
 
 const lastOneDay = (date: string) => {
   return dayjs(date).subtract(1, 'day').format('YYYY-MM-DD')
@@ -51,12 +45,16 @@ fetchData()
 </script>
 
 <template>
-  <div class='rounded-2xl bg-white shadow-sm border ring-1 ring-gray-100 p-4 sm:p-5' v-if="data.data.length > 0">
-    <div class="text-lg font-bold text-gray-600 mb-3">过去七天，您未完成的任务有 </div>
-    <div class="flex flex-col gap-5">
-      <SampleScheduleItem v-for="item in data.data" :key="item.id" :schedule="item" />
+  <transition name="page-fade">
+    <div class='rounded-2xl bg-white shadow-sm border ring-1 ring-gray-100 p-4 sm:p-5'
+      v-if="data.data.length > 0 && !loading">
+      <div class="text-lg font-bold text-gray-600 mb-3">过去七天，您未完成的任务有 </div>
+      <div class="flex flex-col gap-5">
+        <SampleScheduleItem v-for="item in data.data" :key="item.id" :schedule="item" />
+      </div>
     </div>
-  </div>
+  </transition>
+
 </template>
 
 <style scoped></style>
