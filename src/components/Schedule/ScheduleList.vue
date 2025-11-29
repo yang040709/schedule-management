@@ -13,12 +13,9 @@ import { useFetchData } from '@/hooks/useFetchData'
 import { getTodayDate } from '@/utils/date'
 import eventBus from '@/utils/eventBus'
 import { useScheduleList } from '@/hooks/useScheduleList'
-import Skeleton from '../Skeleton/Skeleton.vue'
-
 
 const router = useRouter()
 const route = useRoute()
-
 
 /* 
   如果模态窗有事件，就重新获取数据
@@ -36,22 +33,7 @@ const initialVal: ScheduleListResponse = {
 }
 
 const makeQuery: () => ScheduleListQuery = () => {
-  // interface
-  const statusList: (ScheduleStatus | undefined)[] = ['done', 'pending', 'expired', 'canceled']
-  let status: ScheduleStatus | undefined = undefined
-  let index = statusList.indexOf(status)
-  if (index !== -1 && statusList[index]) {
-    status = statusList[index]
-  }
-  const priorityList: (PriorityLevel | undefined)[] = ['high', 'medium', 'low']
-  let priority: PriorityLevel | undefined = undefined
-  index = priorityList.indexOf(priority)
-  if (index !== -1 && priorityList[index]) {
-    priority = priorityList[index]
-  }
   return {
-    status,
-    priority,
     date: route.params.date?.toString().substring(0, 10) || getTodayDate(),
   }
 }
@@ -94,9 +76,11 @@ const { data, fetchData, loading } = useFetchData(getScheduleListApi, [query], i
 const date = ref(route.params.date?.toString() || getTodayDate())
 
 
+const selectStatus = ref<ScheduleStatus | undefined>(route.query.status as ScheduleStatus | undefined)
+const selectPriority = ref<PriorityLevel | undefined>(route.query.priority as PriorityLevel | undefined)
+
 
 fetchData()
-
 
 const {
   handleToggleComplete,
@@ -111,9 +95,9 @@ const {
 /* 
 监听路由参数变化，重新获取数据
 */
-watch([() => route.params.date, () => route.query.status, () => route.query.priority], (params) => {
-  query.value = makeQuery()
-  fetchData()
+watch([() => route.query.status, () => route.query.priority], (params) => {
+  selectStatus.value = route.query.status as ScheduleStatus | undefined || undefined
+  selectPriority.value = route.query.priority as PriorityLevel | undefined || undefined
 })
 
 
@@ -122,6 +106,8 @@ watch([() => route.params.date, () => route.query.status, () => route.query.prio
 */
 watch(() => route.params.date, (newDate) => {
   date.value = newDate?.toString() || getTodayDate()
+  query.value = makeQuery()
+  fetchData()
 })
 
 /* 
@@ -130,6 +116,9 @@ watch(() => route.params.date, (newDate) => {
 const totalCount = computed(() => data.value.data.length)
 const completedCount = computed(() => {
   return data.value.data.filter((e) => e.status === 'done').length
+})
+const uncompletedCount = computed(() => {
+  return data.value.data.filter((e) => e.status === 'pending').length
 })
 
 /* 
@@ -164,7 +153,6 @@ const showCompletedSchedule = () => {
   处理显示未完成日程事件
 */
 const showUncompletedSchedule = () => {
-  console.log(route)
   router.push({
     name: route.name,
     params: route.params,
@@ -202,6 +190,17 @@ const setPriority = (priority: PriorityLevel) => {
   })
 }
 
+
+const finalList = computed(() => {
+  /* 
+    筛选出符合优先级和状态的日程
+  */
+  return data.value.data.filter((e) => {
+    return (selectStatus.value === undefined || e.status === selectStatus.value) &&
+      (selectPriority.value === undefined || e.priority === selectPriority.value)
+  })
+})
+
 </script>
 
 <template>
@@ -234,7 +233,7 @@ const setPriority = (priority: PriorityLevel) => {
           <span
             class="inline-flex items-center rounded-md bg-yellow-100 text-yellow-800 px-2 py-1 cursor-pointer hover:bg-yellow-200 transition-colors"
             @click="showUncompletedSchedule" :class="route.query.status === 'pending' ? 'outline-1 outline-yellow-300 bg-yellow-200' : ''
-              ">未完成 {{ totalCount - completedCount }}</span>
+              ">未完成 {{ uncompletedCount }}</span>
         </div>
         <div class="flex flex-wrap items-center gap-2 text-sm text-gray-600">
           <span class="text-gray-500 w-12">优先级</span>
@@ -261,7 +260,7 @@ const setPriority = (priority: PriorityLevel) => {
     <!-- <div v-if="loading && data.data.length === 0">
       <Skeleton :count="5" height="h-8" />
     </div> -->
-    <div v-if="data.data.length === 0">
+    <div v-if="finalList.length === 0">
       <div v-if="totalCount === 0" key="empty"
         class="rounded-2xl bg-white py-14 border text-center shadow-sm ring-1 ring-gray-100">
         <div class="mx-auto w-full max-w-sm px-6">
@@ -297,7 +296,7 @@ const setPriority = (priority: PriorityLevel) => {
     </div>
     <div v-else key="schedule-list" class="rounded-2xl bg-white shadow-sm border ring-1 ring-gray-100">
       <TransitionGroup name="list" tag="div">
-        <div class="p-4 sm:p-5" v-for="ev in data.data" :key="ev.id">
+        <div class="p-4 sm:p-5" v-for="ev in finalList" :key="ev.id">
           <ScheduleItem :item="ev" @toggle-complete="handleToggleComplete" @edit="handleEdit" @delete="handleDelete"
             @generate-ai-suggest="generateAISuggest" @remove-ai-suggest="removeAISuggest" @cancel="handleCancel" />
         </div>
