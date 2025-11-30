@@ -24,7 +24,7 @@ export const useScheduleFrom = (initialParam: ScheduleForm, submitFunc: () => vo
   const formSchema = toTypedSchema(
     z.object({
       title: z.string('请输入标题').min(1, '标题不能为空'),
-      description: z.string('请输入描述').optional(),
+      description: z.string('请输入描述').min(1, '描述不能为空'),
       priority: z.enum(['high', 'medium', 'low'], '请选择优先级'),
       category: z.array(z.string('请输入分类')).optional(),
       dependentId: z.string('请输入依赖日程ID').optional(),
