@@ -1,5 +1,6 @@
 <script setup lang='ts'>
 import { ref } from 'vue'
+import { useLocalStorage } from '@vueuse/core'
 
 // 备忘录数据
 interface MemoItem {
@@ -11,7 +12,16 @@ interface MemoItem {
   completed: boolean
 }
 
-const memos = ref<MemoItem[]>([
+// 初始数据
+const initialMemos: MemoItem[] = [
+  {
+    id: 1,
+    title: '项目会议记录',
+    content: '讨论下一季度产品规划，需要准备演示文稿',
+    date: '2025-12-25',
+    tags: ['工作', '会议'],
+    completed: false
+  },
   {
     id: 2,
     title: '购物清单',
@@ -36,13 +46,43 @@ const memos = ref<MemoItem[]>([
     tags: ['健康', '运动'],
     completed: false
   },
-])
+  {
+    id: 5,
+    title: '读书笔记',
+    content: '《JavaScript高级程序设计》第8章：BOM',
+    date: '2025-12-21',
+    tags: ['学习', '阅读'],
+    completed: true
+  }
+]
+
+// 使用useLocalStorage进行本地持久化
+const memos = useLocalStorage<MemoItem[]>('personal-memos', initialMemos, {
+  serializer: {
+    read: (v) => {
+      try {
+        return JSON.parse(v)
+      } catch {
+        return initialMemos
+      }
+    },
+    write: (v) => JSON.stringify(v)
+  }
+})
 
 // 切换完成状态
 const toggleComplete = (id: number) => {
   const memo = memos.value.find(m => m.id === id)
   if (memo) {
     memo.completed = !memo.completed
+  }
+}
+
+// 删除备忘录
+const deleteMemo = (id: number) => {
+  const index = memos.value.findIndex(m => m.id === id)
+  if (index !== -1) {
+    memos.value.splice(index, 1)
   }
 }
 
@@ -64,8 +104,12 @@ const addMemo = () => {
 
   const tags = newMemo.value.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
 
+  // 生成新的ID（找到最大ID加1）
+  const maxId = memos.value.length > 0 ? Math.max(...memos.value.map(m => m.id)) : 0
+  const newId = maxId + 1
+
   memos.value.unshift({
-    id: memos.value.length + 1,
+    id: newId,
     title: newMemo.value.title,
     content: newMemo.value.content,
     date: new Date().toISOString().split('T')[0] as string,
@@ -137,9 +181,16 @@ const addMemo = () => {
             </span>
           </div>
 
-          <div class="flex items-center justify-between text-sm text-gray-500">
-            <span>{{ memo.date }}</span>
-            <span class="text-gray-400">#{{ memo.id }}</span>
+          <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+            <div class="text-sm text-gray-500">
+              <span>{{ memo.date }}</span>
+              <span class="text-gray-400 ml-2">#{{ memo.id }}</span>
+            </div>
+            <button @click="deleteMemo(memo.id)"
+              class="px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition"
+              title="删除备忘录">
+              删除
+            </button>
           </div>
         </div>
       </div>
