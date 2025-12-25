@@ -13,21 +13,60 @@ interface MemoItem {
 }
 
 // 初始数据
-const initialMemos: MemoItem[] = []
+const memos = ref<MemoItem[]>([{
+  id: 1,
+  title: '项目会议记录',
+  content: '讨论下一季度产品规划，需要准备演示文稿',
+  date: '2025-12-25',
+  tags: ['工作', '会议'],
+  completed: false
+},
+{
+  id: 2,
+  title: '购物清单',
+  content: '牛奶、鸡蛋、面包、水果、蔬菜',
+  date: '2025-12-24',
+  tags: ['生活', '购物'],
+  completed: true
+},
+{
+  id: 3,
+  title: '学习计划',
+  content: '完成Vue 3高级特性学习，包括Composition API和Pinia',
+  date: '2025-12-23',
+  tags: ['学习', '技术'],
+  completed: false
+},
+{
+  id: 4,
+  title: '健身计划',
+  content: '每周三次健身房，重点训练胸肌和背部',
+  date: '2025-12-22',
+  tags: ['健康', '运动'],
+  completed: false
+},
+{
+  id: 5,
+  title: '读书笔记',
+  content: '《JavaScript高级程序设计》第8章：BOM',
+  date: '2025-12-21',
+  tags: ['学习', '阅读'],
+  completed: true
+}])
 
-// 使用useLocalStorage进行本地持久化
-const memos = useLocalStorage<MemoItem[]>('personal-memos', initialMemos, {
-  serializer: {
-    read: (v) => {
-      try {
-        return JSON.parse(v)
-      } catch {
-        return initialMemos
-      }
-    },
-    write: (v) => JSON.stringify(v)
-  }
-})
+// // 使用useLocalStorage进行本地持久化
+// const memos = useLocalStorage<MemoItem[]>('personal-memos', initialMemos, {
+//   serializer: {
+//     read: (v) => {
+//       try {
+//         return JSON.parse(v)
+//       } catch {
+//         return initialMemos
+//       }
+//     },
+//     write: (v) => JSON.stringify(v)
+//   }
+// })
 
 // 切换完成状态
 const toggleComplete = (id: number) => {
@@ -87,7 +126,7 @@ const addMemo = () => {
   <div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center mt-5">个人备忘录</h1>
     <!-- 添加备忘录表单 -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <!-- <div class="bg-white rounded-lg shadow-md p-6 mb-8">
       <h2 class="text-xl font-semibold text-gray-700 mb-4">添加新备忘录</h2>
       <div class="space-y-4">
         <div>
@@ -110,7 +149,7 @@ const addMemo = () => {
           添加备忘录
         </button>
       </div>
-    </div>
+    </div> -->
 
     <!-- 备忘录列表 -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -145,11 +184,11 @@ const addMemo = () => {
               <span>{{ memo.date }}</span>
               <span class="text-gray-400 ml-2">#{{ memo.id }}</span>
             </div>
-            <button @click="deleteMemo(memo.id)"
+            <!-- <button @click="deleteMemo(memo.id)"
               class="px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition"
               title="删除备忘录">
               删除
-            </button>
+            </button> -->
           </div>
         </div>
       </div>
