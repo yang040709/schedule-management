@@ -13,8 +13,7 @@ interface MemoItem {
 }
 
 // 初始数据
-const initialMemos: MemoItem[] = [
-]
+const initialMemos: MemoItem[] = []
 
 // 使用useLocalStorage进行本地持久化
 const memos = useLocalStorage<MemoItem[]>('personal-memos', initialMemos, {
