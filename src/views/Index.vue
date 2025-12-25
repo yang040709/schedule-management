@@ -14,46 +14,6 @@ interface MemoItem {
 
 // 初始数据
 const initialMemos: MemoItem[] = [
-  {
-    id: 1,
-    title: '项目会议记录',
-    content: '讨论下一季度产品规划，需要准备演示文稿',
-    date: '2025-12-25',
-    tags: ['工作', '会议'],
-    completed: false
-  },
-  {
-    id: 2,
-    title: '购物清单',
-    content: '牛奶、鸡蛋、面包、水果、蔬菜',
-    date: '2025-12-24',
-    tags: ['生活', '购物'],
-    completed: true
-  },
-  {
-    id: 3,
-    title: '学习计划',
-    content: '完成Vue 3高级特性学习，包括Composition API和Pinia',
-    date: '2025-12-23',
-    tags: ['学习', '技术'],
-    completed: false
-  },
-  {
-    id: 4,
-    title: '健身计划',
-    content: '每周三次健身房，重点训练胸肌和背部',
-    date: '2025-12-22',
-    tags: ['健康', '运动'],
-    completed: false
-  },
-  {
-    id: 5,
-    title: '读书笔记',
-    content: '《JavaScript高级程序设计》第8章：BOM',
-    date: '2025-12-21',
-    tags: ['学习', '阅读'],
-    completed: true
-  }
 ]
 
 // 使用useLocalStorage进行本地持久化
