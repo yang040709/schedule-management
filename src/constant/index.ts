@@ -37,3 +37,4 @@ export const ACCESS_TOKEN_KEY = 'yang-customer-access-token'
   登录就能访问，不登录就不能访问
 */
 export const NO_LOGIN_CAN_ACCESS = ['login', 'register'] as const as readonly string[]
+export const ANY_CAN_ACCESS = ['index'] as const as readonly string[]

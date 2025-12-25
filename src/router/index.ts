@@ -4,17 +4,17 @@ import { getTodayDate } from '@/utils/date'
 import { setupRouteMeta } from '@/utils/meta'
 import { useUserStore } from '@/stores/user'
 import Layout from '@/Layout/Layout.vue'
-import { NO_LOGIN_CAN_ACCESS } from '@/constant'
+import { NO_LOGIN_CAN_ACCESS, ANY_CAN_ACCESS } from '@/constant'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
+      path: '/layout',
       name: 'layout',
       component: Layout,
       children: [
         {
-          path: '/',
+          path: '/home',
           name: 'home',
           redirect: () => {
             return {
@@ -103,6 +103,15 @@ const router = createRouter({
       ],
     },
     {
+      path: '/',
+      name: 'index',
+      component: () => import('@/views/Index.vue'),
+      meta: {
+        layout: 'full',
+        title: '登录',
+      },
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/Login.vue'),
@@ -131,10 +140,19 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const routeName = to.name?.toString()
   const userStore = useUserStore()
+  console.log(routeName, '<==routeName')
+
   try {
     await userStore.ensureUserInfo()
   } catch (error) {
     console.log('获取用户信息失败', error)
+  }
+  console.log(routeName, ANY_CAN_ACCESS.includes(routeName as string))
+
+  console.log(routeName && ANY_CAN_ACCESS.includes(routeName), '<==Any')
+  if (routeName && ANY_CAN_ACCESS.includes(routeName)) {
+    next()
+    return
   }
   if (!userStore.isLogin) {
     /* || !NO_LOGIN_CAN_ACCESS.includes(to.name as string) */
@@ -159,7 +177,8 @@ router.beforeEach(async (to, from, next) => {
   next()
 })
 router.afterEach((to, from) => {
-  setupRouteMeta(to, from)
+  // setupRouteMeta(to, from)
+  console.log('暂时不设置这些玩意')
 })
 
 export default router
