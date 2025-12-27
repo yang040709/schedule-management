@@ -36,6 +36,6 @@ jobs:
             sudo docker pull yang0709/schedule-management-frontend:latest
             sudo docker run -d \
               --add-host=host.docker.internal:host-gateway \
-              -p 127.0.0.1:8080:80 \
+              -p 127.0.0.1:80:80 \
               --name schedule-frontend-app \
               yang0709/schedule-management-frontend:latest
