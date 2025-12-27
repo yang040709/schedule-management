@@ -44,7 +44,9 @@ const onSubmit = () => {
       await useStore.login(cloneDeep(values))
       toast.success('登录成功, 1秒后跳转首页')
       await delay(1000)
-      router.push('/')
+      router.push({
+        name: "home",
+      })
     } catch (error) {
       console.log(error)
     }

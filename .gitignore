@@ -30,3 +30,6 @@ stats.html
 *.sw?
 
 *.tsbuildinfo
+fullchain.pem
+privkey.pem
+resume*
