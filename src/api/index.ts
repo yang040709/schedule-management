@@ -67,7 +67,7 @@ request.interceptors.response.use(
         failedRequestQueue.forEach((item) => item.reject(error))
         failedRequestQueue = []
         userStore.logout()
-        console.log(import.meta.env, '<===env')
+        // console.log(import.meta.env, '<===env')
         // if (import.meta.env.BASE_URL) {
         //   window.location.pathname = import.meta.env.BASE_URL + 'login'
         // } else {

@@ -59,7 +59,8 @@ const commonConfig = defineConfig({
     },
   },
   build: {
-    minify: true,
+    // minify: true,
+    // minify: false,
     rollupOptions: {
       output: {
         manualChunks: (id) => {

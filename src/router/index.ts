@@ -120,15 +120,15 @@ const router = createRouter({
         title: '登录',
       },
     },
-    {
-      path: '/register',
-      name: 'register',
-      component: () => import('@/views/Register.vue'),
-      meta: {
-        layout: 'full',
-        title: '注册',
-      },
-    },
+    // {
+    //   path: '/register',
+    //   name: 'register',
+    //   component: () => import('@/views/Register.vue'),
+    //   meta: {
+    //     layout: 'full',
+    //     title: '注册',
+    //   },
+    // },
     {
       path: '/:catchAll(.*)',
       name: 'not-found',

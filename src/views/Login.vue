@@ -64,8 +64,8 @@ const onSubmit = () => {
           <img src="/logo.png" alt="" class="w-10 h-10 mr-3" />
           <span class="text-3xl font-bold text-gray-900">简程</span>
         </div> -->
-        <h2 class="mt-6 text-2xl font-bold text-gray-900">欢迎回来</h2>
-        <p class="mt-2 text-sm text-gray-600">请登录您的账户</p>
+        <h2 class="mt-6 text-2xl font-bold text-gray-900">进入管理后台</h2>
+        <p class="mt-2 text-sm text-gray-600">请登录个人备忘录管理员账户</p>
       </div>
       <div class="bg-white rounded-xl shadow-sm p-8">
         <form @submit.prevent="onSubmit" class="space-y-5">
@@ -94,11 +94,11 @@ const onSubmit = () => {
               class="w-full h-12 text-white font-medium rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]">登录</Button>
           </div>
         </form>
-        <div class="mt-6">
+        <!-- <div class="mt-6">
           <div class="text-center text-sm text-gray-600">
             还没有账号？<RouterLink to="/register" class="text-blue-500 font-medium hover:underline">去注册</RouterLink>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
