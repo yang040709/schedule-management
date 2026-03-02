@@ -15,11 +15,11 @@ interface MemoItem {
 // 初始数据
 const memos = ref<MemoItem[]>([{
   id: 1,
-  title: '项目会议记录',
-  content: '讨论下一季度产品规划，需要准备演示文稿',
-  date: '2025-12-25',
+  title: '找到前端实习',
+  content: '找到了',
+  date: '2025-3-2',
   tags: ['工作', '会议'],
-  completed: false
+  completed: true
 },
 {
   id: 2,
@@ -33,7 +33,7 @@ const memos = ref<MemoItem[]>([{
   id: 3,
   title: '学习计划',
   content: '完成Vue 3高级特性学习，包括Composition API和Pinia',
-  date: '2025-12-23',
+  date: '2025-3-1',
   tags: ['学习', '技术'],
   completed: false
 },
@@ -222,15 +222,22 @@ const addMemo = () => {
 
   <!-- ICP备案信息 -->
   <footer class="site-footer">
-    <div class="container">
-      <p>
-        © {{ new Date().getFullYear() }} 个人备忘录<br />
-        本网站为个人非经营性网站，仅用于本人记录日常事项，不对外提供服务。<br />
+    <div class="footer-container">
+
+      © {{ new Date().getFullYear() }} 个人备忘录<br />
+      本网站为个人非经营性网站，仅用于本人记录日常事项，不对外提供服务。<br />
+      <p class="icp-container">
         <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"
-          style="color: inherit; text-decoration: underline;">
+          class="hover:text-blue-600 transition flex items-center justify-center">
           粤ICP备2025505073号-2
         </a>
+        <a href="https://beian.mps.gov.cn/#/query/webSearch?code=44051502000687" target="_blank"
+          rel="noopener noreferrer" class="hover:text-blue-600 transition flex items-center justify-center">
+          <img src="/gongan.png" alt="公安备案图标" class="w-4 h-4 mr-1" style="vertical-align: middle;" />
+          粤公网安备 44051502000687 号
+        </a>
       </p>
+
     </div>
   </footer>
 </template>
@@ -256,5 +263,22 @@ const addMemo = () => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+}
+
+.icp-container {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 5px 20px;
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; */
 }
 </style>
